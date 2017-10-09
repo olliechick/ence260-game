@@ -65,7 +65,7 @@ static void display_column (uint8_t row_pattern, uint8_t current_column)
 
 
 /** Plays the demo and returns when the button is pressed. NOTE: CURRENTLY DOESN'T RETURN*/
-int play_demo (void)
+void play_demo (void)
 {
     uint8_t current_column = 0;
   
@@ -91,6 +91,17 @@ int play_demo (void)
     {
         pacer_wait ();
         
+        // If button is pushed, return (skip the demo).
+        if(pio_input_get(BUTTON1_PIO))
+        {
+			return;
+		}
+        
+        // Demo animation
+        
+        
+        
+        
         display_column (arrow[current_column], current_column);
     
         current_column++;
@@ -98,6 +109,7 @@ int play_demo (void)
         if (current_column > (LEDMAT_COLS_NUM - 1))
         {
             current_column = 0;
-        }           
+        }  
+             
     }
 }
