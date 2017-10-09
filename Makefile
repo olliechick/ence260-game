@@ -17,10 +17,13 @@ all: game.out
 
 # Compile: create object files from C source files.
 
-game.o: game.c demo.h
+game.o: game.c demo.h connect.h ../../drivers/avr/system.h
 	$(CC) -c $(CFLAGS) $< -o $@
 
 demo.o: demo.c ../../drivers/avr/pio.h ../../drivers/avr/system.h ../../utils/pacer.h
+	$(CC) -c $(CFLAGS) $< -o $@
+	
+connect.o: connect.c
 	$(CC) -c $(CFLAGS) $< -o $@
 
 pio.o: ../../drivers/avr/pio.c ../../drivers/avr/pio.h ../../drivers/avr/system.h
@@ -38,7 +41,7 @@ pacer.o: ../../utils/pacer.c ../../drivers/avr/system.h ../../drivers/avr/timer.
 
 
 # Link: create ELF output file from object files.
-game.out: game.o demo.o system.o timer.o pio.o pacer.o
+game.out: game.o demo.o connect.o system.o timer.o pio.o pacer.o
 	$(CC) $(CFLAGS) $^ -o $@ -lm
 	$(SIZE) $@
 

@@ -1,5 +1,5 @@
 /**
- * @file demo.c
+ * @file demo.h
  * @author Ollie Chick
  * @date 10 October 2017
  * @brief Demo module
