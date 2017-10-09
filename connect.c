@@ -5,6 +5,8 @@
  * @brief Connects to another funkit
  */
 
+#include "ir_uart.h"
+       
 /**
  * Connects to another funkit.
  * Waits for the delay (ms) first to receive anything.
@@ -24,7 +26,7 @@ int connect(int delay) {
 
            ch = ir_uart_getc ();
 
-           if (ch = 's') {
+           if (ch == 's') {
                // other kit was already sending
                return 1;
            }

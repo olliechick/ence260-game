@@ -11,7 +11,7 @@ static uint8_t player_number;
  * @return 1 if the game is finished, 0 if not.
  */
 int play (void) {
-    return 0;
+    return 1;
 }
 
 /**
