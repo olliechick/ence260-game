@@ -23,7 +23,7 @@ game.o: game.c demo.h connect.h ../../drivers/avr/system.h
 demo.o: demo.c ../../drivers/avr/pio.h ../../drivers/avr/system.h ../../utils/pacer.h
 	$(CC) -c $(CFLAGS) $< -o $@
 	
-connect.o: connect.c ../../drivers/avr/ir_uart.h
+connect.o: connect.c ../../drivers/avr/ir_uart.h ../../utils/pacer.h
 	$(CC) -c $(CFLAGS) $< -o $@
 
 pio.o: ../../drivers/avr/pio.c ../../drivers/avr/pio.h ../../drivers/avr/system.h

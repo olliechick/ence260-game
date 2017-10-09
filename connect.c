@@ -6,6 +6,7 @@
  */
 
 #include "ir_uart.h"
+#include "pacer.h"
        
 /**
  * Connects to another funkit.
@@ -16,20 +17,29 @@
  *      1 if they received immediately
  */
 int connect(int delay) {
-   ir_uart_init ();
-
-   while (1)
-   {
-       if (ir_uart_read_ready_p ())
-       {
-           char ch;
-
-           ch = ir_uart_getc ();
-
-           if (ch == 's') {
-               // other kit was already sending
-               return 1;
-           }
-       }
-   }
+    ir_uart_init ();
+    
+    total_paces = delay/100;
+    if (total_paces = 0) {
+        total_paces = 1;
+    }
+    
+    pacer_init(10)
+    
+    while (1)
+    {
+        pacer_wait();
+        
+        if (ir_uart_read_ready_p ())
+        {
+            char ch;
+            
+            ch = ir_uart_getc ();
+            
+            if (ch == 's') {
+                // other kit was already sending
+                return 1;
+            }
+        }
+    }
 }
