@@ -1,14 +1,10 @@
 #include "system.h"
+#include "demo.h"
 
 int main (void)
 {
-    system_init ();
-
-
-    while (1)
-    {
-
-
-
-    }
+    system_init();
+    play_demo();
+    
+    return 0;
 }
