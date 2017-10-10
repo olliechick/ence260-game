@@ -19,12 +19,12 @@
 int connect(int delay) {
     ir_uart_init ();
     
-    total_paces = delay/100;
-    if (total_paces = 0) {
+    uint8_t total_paces = delay/100;
+    if (total_paces == 0) {
         total_paces = 1;
     }
     
-    pacer_init(10)
+    pacer_init(10);
     
     while (1)
     {

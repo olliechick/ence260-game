@@ -8,6 +8,11 @@
 #ifndef DEMO_H
 #define DEMO_H
 
+
+#include "system.h"
+#include "pio.h"
+#include "pacer.h"
+
 /** Plays the demo and returns when the button is pressed. NOTE: CURRENTLY DOESN'T RETURN*/
 int play_demo (void);
 

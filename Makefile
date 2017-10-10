@@ -17,10 +17,13 @@ all: game.out
 
 # Compile: create object files from C source files.
 
-game.o: game.c demo.h connect.h ../../drivers/avr/system.h
+game.o: game.c demo.h connect.h ../../drivers/avr/system.h endgame.h 
 	$(CC) -c $(CFLAGS) $< -o $@
 
 demo.o: demo.c ../../drivers/avr/pio.h ../../drivers/avr/system.h ../../utils/pacer.h
+	$(CC) -c $(CFLAGS) $< -o $@
+	
+endgame.o: endgame.c 
 	$(CC) -c $(CFLAGS) $< -o $@
 	
 connect.o: connect.c ../../drivers/avr/ir_uart.h ../../utils/pacer.h

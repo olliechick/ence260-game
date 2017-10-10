@@ -1,9 +1,12 @@
 #include "system.h"
 #include "demo.h"
 #include "connect.h"
+#include "endgame.h"
 
 /** The game board */
-static uint8_t board[9] = {0};
+uint8_t board[9] = {0};
+
+/** The player number (0 or 1) */
 static uint8_t player_number;
 
 /**
@@ -28,19 +31,24 @@ void other_player_play (void) {
 int main (void)
 {
     int finished;
+    int delay = 500; //wait time in milliseconds to get signal
+    
+    system_init();
     
     while (1) {
-        system_init();
         play_demo(); //returns when button is pushed
 
         //Check what player you are
-        if (connect()) {
+        if (connect(delay)) {
             player_number = 0;
             finished = play();
         } else {
             player_number = 1;
             finished = 0;
         }
+    
+        board[0] = player_number; //DEBUG so it doesn't complain about unused variables
+        player_number = board[1]; //DEBUG so it doesn't complain about unused variables
 
         //Main game loop
         while (!finished) {
@@ -49,7 +57,9 @@ int main (void)
         }
         
         //game has now finished
-        endgame();
+        //endgame();
             
     }
+    
+    return 0;
 }
