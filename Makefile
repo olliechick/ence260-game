@@ -17,7 +17,7 @@ all: game.out
 
 # Compile: create object files from C source files.
 
-game.o: game.c demo.h connect.h ../../drivers/avr/system.h endgame.h 
+game.o: game.c demo.h connect.h endgame.h ../../drivers/avr/system.h ../../drivers/led.h
 	$(CC) -c $(CFLAGS) $< -o $@
 
 demo.o: demo.c ../../drivers/avr/pio.h ../../drivers/avr/system.h ../../utils/pacer.h
@@ -53,10 +53,13 @@ timer0.o: ../../drivers/avr/timer0.c ../../drivers/avr/bits.h ../../drivers/avr/
 usart1.o: ../../drivers/avr/usart1.c ../../drivers/avr/system.h ../../drivers/avr/usart1.h
 	$(CC) -c $(CFLAGS) $< -o $@
 
+led.o: ../../drivers/led.c ../../drivers/led.h
+	$(CC) -c $(CFLAGS) $< -o $@
+
 
 
 # Link: create ELF output file from object files.
-game.out: game.o demo.o connect.o system.o timer.o pio.o pacer.o ir_uart.o timer0.o usart1.o timer.o prescale.o
+game.out: game.o demo.o connect.o system.o timer.o pio.o pacer.o ir_uart.o timer0.o usart1.o timer.o prescale.o endgame.o led.o
 	$(CC) $(CFLAGS) $^ -o $@ -lm
 	$(SIZE) $@
 

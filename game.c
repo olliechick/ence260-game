@@ -1,4 +1,5 @@
 #include "system.h"
+#include "led.h"
 #include "demo.h"
 #include "connect.h"
 #include "endgame.h"
@@ -33,7 +34,10 @@ int main (void)
     int finished;
     int delay = 500; //wait time in milliseconds to get signal
     
+    // Initialisation
     system_init();
+    led_init();
+    led_set (LED1, 0); //turn off led
     
     while (1) {
         play_demo(); //returns when button is pushed
@@ -41,9 +45,11 @@ int main (void)
         //Check what player you are
         if (connect(delay)) {
             player_number = 0;
+            led_set (LED1, 1);
             finished = play();
         } else {
             player_number = 1;
+            led_set (LED1, 0);
             finished = 0;
         }
     
@@ -57,7 +63,7 @@ int main (void)
         }
         
         //game has now finished
-        //endgame();
+        endgame();
             
     }
     
