@@ -7,6 +7,10 @@
 
 #include "ir_uart.h"
 #include "pacer.h"
+#include "led.h" //LED FOR DEBUG
+
+#define SEND_FREQUENCY 100 //Hz
+#define MILLISECS_IN_A_SEC 1000
        
 /**
  * Connects to another funkit.
@@ -18,15 +22,15 @@
  */
 int connect(int delay) {
     
+    // Initialisation
     ir_uart_init ();
-    pacer_init(10); //Initialize pacer to 10Hz
+    pacer_init(SEND_FREQUENCY); //Initialize pacer to SEND_FREQUENCY
+    led_init(); //Initialize led LED FOR DEBUG
+    led_set (LED1, 0); //turn off led LED FOR DEBUG
     
-    // Get how many paces it should do, based on a freq of 10Hz
-    // +1 to account for any discarded remainder when dividing by 100
-    uint8_t total_paces = delay/100 + 1;
-    if (total_paces == 0) {
-        total_paces = 1;
-    }
+    // Get how many paces it should do, based on SEND_FREQUENCY
+    // Note: +1 is to account for any discarded remainder when dividing
+    uint8_t total_paces = delay/(MILLISECS_IN_A_SEC/SEND_FREQUENCY) + 1;
     
     // Try to receive a signal from other kit
     uint8_t i;
@@ -37,9 +41,7 @@ int connect(int delay) {
         if (ir_uart_read_ready_p ())
         {
             char ch;
-            
             ch = ir_uart_getc ();
-            
             if (ch == 's') {
                 // other kit was already sending
                 ir_uart_putc('a'); //send acknowledgement
@@ -49,7 +51,7 @@ int connect(int delay) {
     }
     
     // We've waited long enough, lets try to send
-    
+    led_set (LED1, 1); //LED FOR DEBUG
     while (1)
     {
         pacer_wait();
@@ -60,7 +62,7 @@ int connect(int delay) {
         {
             char character = ir_uart_getc ();
             if (character == 'a') {
-                //They have accepted they are the second player
+                //They have accepted the signal
                 return 0;
             }
         }
