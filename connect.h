@@ -19,7 +19,7 @@
  * @return 0 if they didn't receive something initially but later got an ack,
  *      1 if they received immediately
  */
-int connect(int delay);
+int connect();
 
 
 #endif
