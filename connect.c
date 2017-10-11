@@ -12,7 +12,7 @@
 
 #define SEND_FREQUENCY 100 //Hz
 #define MILLISECS_IN_A_SEC 1000
-#define DELAY 2600 // wait time in milliseconds to get signal
+#define DELAY 500 // wait time in milliseconds to get signal
 
 /**
  * Checks if the other kit is sending
@@ -70,7 +70,7 @@ static void send(void) {
         
     }
 }
-       
+
 /**
  * Connects to another funkit.
  * Waits for the delay (ms) first to receive anything.

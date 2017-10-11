@@ -64,7 +64,7 @@ static void display_column (uint8_t row_pattern, uint8_t current_column)
 }
 
 
-/** Plays the demo and returns when the button is pressed. NOTE: CURRENTLY DOESN'T RETURN*/
+/** Plays the demo and returns when the button is pressed. */
 void play_demo (void)
 {
     uint8_t current_column = 0;

@@ -13,7 +13,7 @@
 #include "pio.h"
 #include "pacer.h"
 
-/** Plays the demo and returns when the button is pressed. NOTE: CURRENTLY DOESN'T RETURN*/
-int play_demo (void);
+/** Plays the demo and returns when the button is pressed. */
+void play_demo (void);
 
 #endif

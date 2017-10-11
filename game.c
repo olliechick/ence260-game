@@ -4,13 +4,9 @@
 #include "connect.h"
 #include "play.h"
 
-/**
- * The main loop of the game.
- */
+/** The main loop of the game. */
 int main (void)
-{
-    int delay = 1000; //wait time in milliseconds to get signal
-    
+{    
     // Initialisation
     system_init();
     led_init(); //LED FOR DEBUG
@@ -21,7 +17,7 @@ int main (void)
 
         //Check what player you are
         uint8_t player_number; // player number (1 or 2)
-        if (connect(delay)) {
+        if (connect()) {
             player_number = 1;
             led_set (LED1, 1); //LED FOR DEBUG
         } else {

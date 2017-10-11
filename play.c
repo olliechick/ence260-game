@@ -61,8 +61,8 @@ static Result get_result(void) {
     return NOT_FINISHED;
 }
  
- /** Displays the result as a face: either :), :(, or :| until the button is pushed*/
-void display_result(Result result) {
+ /** Displays the result as a face: either :), :(, or :| until the button is pushed */
+static void display_result(Result result) {
     board[0] = result; //DEBUG so it doesn't complain about unused variables
     //TODO
     return;
@@ -72,7 +72,7 @@ void display_result(Result result) {
  * Current player having their turn.
  * @return the current result of the game
  */
-Result your_turn (void) {
+static Result your_turn (void) {
     //TODO
     return get_result();
 }
@@ -82,7 +82,7 @@ Result your_turn (void) {
  * It will then place their symbol in that position on the board.
  * @return the current result of the game
  */
-Result other_players_turn (void) {
+static Result other_players_turn (void) {
     //TODO
     return get_result();
 }
