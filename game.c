@@ -1,7 +1,7 @@
 #include "system.h"
 #include "led.h"
-#include "display.h"
 #include "tinygl.h"
+#include "ir_uart.h"
 #include "../fonts/font5x7_1.h"
 
 #include "demo.h"
@@ -16,7 +16,7 @@
 void initialise(void) {
     
     system_init();
-    display_init();
+    ir_uart_init ();
     
     /* LED */
     led_init();
@@ -27,6 +27,7 @@ void initialise(void) {
     tinygl_font_set (&font5x7_1);
     tinygl_text_speed_set (MESSAGE_RATE);
     tinygl_text_mode_set (TINYGL_TEXT_MODE_SCROLL);
+    
 }
 
 
@@ -36,7 +37,9 @@ int main (void) {
     initialise();
     
     while (1) {
+        led_set (LED1, 1); //LED FOR DEBUG
         play_demo(); //returns when button is pushed
+        led_set (LED1, 0); //LED FOR DEBUG
         
 
         //Check what player you are

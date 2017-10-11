@@ -10,7 +10,6 @@
 #include "led.h" //LED FOR DEBUG
 
 #include "system.h"
-#include "display.h"
 #include "pacer.h"
 #include "tinygl.h"
 #include "../fonts/font5x7_1.h"
@@ -25,7 +24,7 @@
  */
 static bool check_if_sending(void) {
     
-    tinygl_text("sending");
+    tinygl_draw_char('R', tinygl_point(0, 0));
     
     // Get how many paces it should do, based on SEND_FREQUENCY
     // Note: +1 is to account for any discarded remainder when dividing
@@ -37,52 +36,53 @@ static bool check_if_sending(void) {
     for (i = 0; i < total_paces; i++)
     {
         pacer_wait();
+        tinygl_update();
         
-        if (ir_uart_read_ready_p ())
+        if (ir_uart_read_ready_p())
         {
-            char ch;
-            ch = ir_uart_getc ();
-            if (ch == 's') {
+            if (ir_uart_getc() == 's') {
                 // other kit was already sending
                 ir_uart_putc('a'); //send acknowledgement
+                tinygl_clear();
+                tinygl_update();
                 return true;
             }
         }
-        tinygl_update ();
     }
-    display_clear();
+    
     // Waited long enough with no signal
+    tinygl_clear();
+    tinygl_update();
     return false;
 }
 
 /** Sends to the other kit until it gets an acknowledgement signal back */
 static void send(void) {
     
-    tinygl_text("receiving");
+    tinygl_draw_char('S', tinygl_point(0, 0));
     
-    uint8_t ticker = 0;
+    uint8_t ticker = 1;
     
-    // We've waited long enough, lets try to send
+    // Sending loop
     while (1)
     {
         pacer_wait();
-        tinygl_update ();
-        
-        //roughly twice a second, send and check for ack
+        tinygl_update();
+        //Every 2^8 = 256 loops (to ensure ledmat doesn't flicker):
         if (ticker == 0) {
             ir_uart_putc('s'); //send 
-            
             //Try and get a response
-            if (ir_uart_read_ready_p ())
+            if (ir_uart_read_ready_p())
             {
-                char character = ir_uart_getc ();
-                if (character == 'a') {
+                if (ir_uart_getc() == 'a') {
                     //They have accepted the signal
+                    tinygl_clear();
+                    tinygl_update();
                     return;
-                }
+                } 
             }
-            ticker ++;
         }
+        ticker++;
     }
 }
 
@@ -94,17 +94,15 @@ static void send(void) {
  *  false if they didn't receive a signal initially but later got an ack
  *      
  */
-bool connect() {
+bool connect(void) {
     
-    // Initialisation
-    ir_uart_init ();
     pacer_init(SEND_FREQUENCY); //Initialize pacer to SEND_FREQUENCY
     
     if (check_if_sending()) {
         // Received a signal
         return true;
     } else {
-        led_set (LED1, 1); //LED FOR DEBUG
+        // No signal received
         send(); //keep sending until they send back an ack
         return false;
     }
