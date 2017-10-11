@@ -1,10 +1,15 @@
 #include <stdbool.h>
 #include <stdint.h>
 
+#include "tinygl.h"
+#include "pacer.h"
+
 #define BOARD_SIZE 9
+#define PACER_RATE 500 //Hz
 
 /** The game board */
 static uint8_t board[9] = {0};
+static uint8_t board_bitmap[5] = {0};
 
 typedef enum {NOT_FINISHED, PLAYER_1_WON, PLAYER_2_WON, TIE} Result;
 
@@ -60,6 +65,48 @@ static Result get_result(void) {
     // No result so far
     return NOT_FINISHED;
 }
+
+/** Updates board_bitmap based on board */
+static void set_board_bitmap(bool flip, uint8_t cursor_position, bool cursor_on)
+{
+    int i;
+    int row;
+    for (i = 0; i < BOARD_SIZE; i++) {
+        // Choose which row to modify
+        if (i < 3) {
+            row = 0;
+        } else if (i < 6) {
+            row = 2;
+        } else {
+            row = 4;
+        }
+        
+        //Modify it
+        if (cursor_position == i) {
+            // the cursor is here
+            if (cursor_on) {
+                // flash on
+                board_bitmap[row] |= 1 << (5 - 2*(i%3)) | 1 << (6 - 2*(i%3));
+            } else {
+                //flash off
+                board_bitmap[row] &= ~(1 << (5 - 2*(i%3))) & ~(1 << (6 - 2*(i%3)));
+            }
+        } else if (board[i] == 1) {
+            // player 1 is here
+            board_bitmap[row] |= 1 << (5 - 2*(i%3)) | 1 << (6 - 2*(i%3));
+        } else if (board[i] == 2) {
+            // player 2 is here
+            if (flip) {
+                board_bitmap[row] &= ~(1 << (5 - 2*(i%3)));
+                board_bitmap[row] |= 1 << (6 - 2*(i%3));
+            } else {
+                board_bitmap[row] &= ~(1 << (6 - 2*(i%3)));
+                board_bitmap[row] |= 1 << (5 - 2*(i%3));
+            }
+                
+        }
+    }
+}
  
  /** Displays the result as a face: either :), :(, or :| until the button is pushed */
 static void display_result(Result result) {
@@ -68,12 +115,80 @@ static void display_result(Result result) {
     return;
 }
 
+/** 
+ * Sets the display (cell by cell) given a bitmap.
+ * COPIED FROM demo.c - refactor into new module?
+ */
+static void set_display(const uint8_t bitmap[])
+{
+    int i;
+    int j;
+    for (i = 0; i < DISPLAY_WIDTH; i++) {
+        for (j = 0; j < DISPLAY_HEIGHT; j++) {
+            bool val = bitmap[i] & (1 << j);
+            tinygl_draw_point(tinygl_point(i, j), val);
+        }
+    }
+    return;
+}
+
+static uint8_t find_cursor_position(void) {
+    return 0; //temporary placeholder
+}
+
 /**
  * Current player having their turn.
  * @return the current result of the game
  */
-static Result your_turn (void) {
-    //TODO
+static Result your_turn (void)
+{   
+    bool flip = false;
+    bool cursor_on = false;
+    uint16_t ticker = 1;
+    pacer_init(PACER_RATE);
+    
+    uint8_t cursor_position = find_cursor_position();
+    
+    // TEST configuration of board and cursor
+    cursor_position = 0;
+    board[0] = 1;
+    board[1] = 2;
+    board[2] = 0;
+    board[3] = 0;
+    board[4] = 1;
+    board[5] = 1;
+    board[6] = 2;
+    board[7] = 0;
+    board[8] = 2;
+    // ENDOF TEST configuration
+    
+    set_board_bitmap(flip, cursor_position, cursor_on);
+    set_display(board_bitmap);
+    
+    while (1) {
+        pacer_wait();
+        
+        if (ticker % (PACER_RATE/2) == 0) {
+            //Flip player 2's bit at 2Hz
+            flip = !flip;
+            set_board_bitmap(flip, cursor_position, cursor_on);
+            set_display(board_bitmap);
+        }
+        if (ticker % (PACER_RATE/5) == 0) {
+            //Flash the cursor at 5Hz
+            cursor_on = !cursor_on;
+            set_board_bitmap(flip, cursor_position, cursor_on);
+            set_display(board_bitmap);
+        }
+        if (ticker % PACER_RATE == 0) {
+            //Reset ticker every 1Hz
+            ticker = 1;
+        }
+        
+        tinygl_update();
+        ticker++;
+    }
+    
     return get_result();
 }
 

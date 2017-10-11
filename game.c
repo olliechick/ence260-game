@@ -45,11 +45,12 @@ int main (void) {
         //Check what player you are
         uint8_t player_number; // player number (1 or 2)
         if (connect()) {
-            player_number = 1;
-            led_set (LED1, 1); //LED FOR DEBUG
-        } else {
+            // Got an immediate connection, so we are player 2
             player_number = 2;
             led_set (LED1, 0); //LED FOR DEBUG
+        } else {
+            player_number = 1;
+            led_set (LED1, 1); //LED FOR DEBUG
         }
         
         play(player_number);
