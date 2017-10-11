@@ -6,13 +6,18 @@
  */
 
 #include "ir_uart.h"
-#include "pacer.h"
 #include <stdbool.h>
 #include "led.h" //LED FOR DEBUG
 
-#define SEND_FREQUENCY 100 //Hz
+#include "system.h"
+#include "display.h"
+#include "pacer.h"
+#include "tinygl.h"
+#include "../fonts/font5x7_1.h"
+
+#define SEND_FREQUENCY 500 //Hz
 #define MILLISECS_IN_A_SEC 1000
-#define DELAY 500 // wait time in milliseconds to get signal
+#define DELAY 5000 // wait time in milliseconds to get signal
 
 /**
  * Checks if the other kit is sending
@@ -20,7 +25,7 @@
  */
 static bool check_if_sending(void) {
     
-    pacer_init(SEND_FREQUENCY); //Initialize pacer to SEND_FREQUENCY
+    tinygl_text("sending");
     
     // Get how many paces it should do, based on SEND_FREQUENCY
     // Note: +1 is to account for any discarded remainder when dividing
@@ -43,8 +48,9 @@ static bool check_if_sending(void) {
                 return true;
             }
         }
+        tinygl_update ();
     }
-    
+    display_clear();
     // Waited long enough with no signal
     return false;
 }
@@ -52,22 +58,31 @@ static bool check_if_sending(void) {
 /** Sends to the other kit until it gets an acknowledgement signal back */
 static void send(void) {
     
+    tinygl_text("receiving");
+    
+    uint8_t ticker = 0;
+    
     // We've waited long enough, lets try to send
     while (1)
     {
         pacer_wait();
-        ir_uart_putc('s'); //send 
+        tinygl_update ();
         
-        //Try and get a response
-        if (ir_uart_read_ready_p ())
-        {
-            char character = ir_uart_getc ();
-            if (character == 'a') {
-                //They have accepted the signal
-                return;
+        //roughly twice a second, send and check for ack
+        if (ticker == 0) {
+            ir_uart_putc('s'); //send 
+            
+            //Try and get a response
+            if (ir_uart_read_ready_p ())
+            {
+                char character = ir_uart_getc ();
+                if (character == 'a') {
+                    //They have accepted the signal
+                    return;
+                }
             }
+            ticker ++;
         }
-        
     }
 }
 
@@ -83,8 +98,7 @@ bool connect() {
     
     // Initialisation
     ir_uart_init ();
-    led_init(); //Initialize led LED FOR DEBUG
-    led_set (LED1, 0); //turn off led LED FOR DEBUG
+    pacer_init(SEND_FREQUENCY); //Initialize pacer to SEND_FREQUENCY
     
     if (check_if_sending()) {
         // Received a signal

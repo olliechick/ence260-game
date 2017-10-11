@@ -9,9 +9,13 @@
 #define CONNECT_H
 
 #include "ir_uart.h"
-#include "pacer.h"
 #include <stdbool.h>
 #include "led.h" //LED FOR DEBUG
+
+#include "system.h"
+#include "pacer.h"
+#include "tinygl.h"
+#include "../fonts/font5x7_1.h"
 
 #define SEND_FREQUENCY 100 //Hz
 #define MILLISECS_IN_A_SEC 1000
@@ -25,7 +29,7 @@
  *  false if they didn't receive a signal initially but later got an ack
  *      
  */
-bool connect();
+bool connect(void);
 
 
 #endif

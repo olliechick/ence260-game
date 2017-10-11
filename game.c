@@ -1,19 +1,43 @@
 #include "system.h"
-#include "led.h" //LED FOR DEBUG
+#include "led.h"
+#include "display.h"
+#include "tinygl.h"
+#include "../fonts/font5x7_1.h"
+
 #include "demo.h"
 #include "connect.h"
 #include "play.h"
 
-/** The main loop of the game. */
-int main (void)
-{    
-    // Initialisation
+#define PACER_RATE 500
+#define LOOP_RATE 500
+#define MESSAGE_RATE 10
+
+/** Performs initilisation steps */
+void initialise(void) {
+    
     system_init();
-    led_init(); //LED FOR DEBUG
-    led_set (LED1, 0); //turn off led LED FOR DEBUG
+    display_init();
+    
+    /* LED */
+    led_init();
+    led_set (LED1, 0); //turn off LED
+    
+    /* TinyGL */
+    tinygl_init(LOOP_RATE);
+    tinygl_font_set (&font5x7_1);
+    tinygl_text_speed_set (MESSAGE_RATE);
+    tinygl_text_mode_set (TINYGL_TEXT_MODE_SCROLL);
+}
+
+
+/** The main loop of the game. */
+int main (void) {
+    
+    initialise();
     
     while (1) {
         play_demo(); //returns when button is pushed
+        
 
         //Check what player you are
         uint8_t player_number; // player number (1 or 2)
