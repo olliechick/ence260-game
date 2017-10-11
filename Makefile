@@ -67,8 +67,8 @@ display.o: ../../drivers/display.c ../../drivers/avr/system.h ../../drivers/disp
 
 ledmat.o: ../../drivers/ledmat.c ../../drivers/avr/pio.h ../../drivers/avr/system.h ../../drivers/ledmat.h
 	$(CC) -c $(CFLAGS) $< -o $@
-	
-button.o: ../../drivers/button.c ../../drivers/avr/system.h
+
+button.o: ../../drivers/button.c ../../drivers/avr/pio.h ../../drivers/avr/system.h ../../drivers/button.h
 	$(CC) -c $(CFLAGS) $< -o $@
 	
 

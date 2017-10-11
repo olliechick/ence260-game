@@ -85,7 +85,7 @@ void play_demo (void)
         pacer_wait();
         
         // If button is pushed, return (skip the demo).
-        if(pio_input_get(BUTTON1_PIO))
+        if(button_push_event_p (BUTTON1))
         {
             tinygl_clear();
             tinygl_update();
@@ -109,6 +109,7 @@ void play_demo (void)
         
         
         tinygl_update(); //refresh screen
+        button_update(); //poll button
         ticker++;
         
     }

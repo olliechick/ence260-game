@@ -74,11 +74,11 @@ static void set_board_bitmap(bool flip, uint8_t cursor_position, bool cursor_on)
     for (i = 0; i < BOARD_SIZE; i++) {
         // Choose which row to modify
         if (i < 3) {
-            row = 0;
+            row = 0; // First row
         } else if (i < 6) {
-            row = 2;
+            row = 2; // Second row
         } else {
-            row = 4;
+            row = 4; //Third row
         }
         
         //Modify it
@@ -132,8 +132,20 @@ static void set_display(const uint8_t bitmap[])
     return;
 }
 
-static uint8_t find_cursor_position(void) {
-    return 0; //temporary placeholder
+/**
+ * @return the initial position of the cursor on the board
+ */
+static uint8_t find_init_cursor_position(void) {
+    int i = 0;
+    // Iterate through places on board
+    for (i = 0; i < BOARD_SIZE; i++) {
+        if (board[i] == 0) {
+            // This place has nothing in it
+            return i;
+        }
+    }
+    // If we find ourselves here, the board is full
+    return BOARD_SIZE;
 }
 
 /**
@@ -144,13 +156,10 @@ static Result your_turn (void)
 {   
     bool flip = false;
     bool cursor_on = false;
-    uint16_t ticker = 1;
+    uint16_t ticker = 1; //Note this will overflow if PACER_RATE > 2^16 = 65536
     pacer_init(PACER_RATE);
     
-    uint8_t cursor_position = find_cursor_position();
-    
     // TEST configuration of board and cursor
-    cursor_position = 0;
     board[0] = 1;
     board[1] = 2;
     board[2] = 0;
@@ -162,11 +171,15 @@ static Result your_turn (void)
     board[8] = 2;
     // ENDOF TEST configuration
     
+    uint8_t cursor_position = find_init_cursor_position();
+    
     set_board_bitmap(flip, cursor_position, cursor_on);
     set_display(board_bitmap);
     
     while (1) {
         pacer_wait();
+        
+        
         
         if (ticker % (PACER_RATE/2) == 0) {
             //Flip player 2's bit at 2Hz
@@ -181,7 +194,7 @@ static Result your_turn (void)
             set_display(board_bitmap);
         }
         if (ticker % PACER_RATE == 0) {
-            //Reset ticker every 1Hz
+            //Reset ticker every 1Hz to prevent overflow
             ticker = 1;
         }
         
