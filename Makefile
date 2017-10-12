@@ -23,7 +23,7 @@ game.o: game.c demo.h connect.h play.h ../../drivers/avr/system.h ../../drivers/
 demo.o: demo.c ../../drivers/avr/pio.h ../../drivers/avr/system.h ../../utils/pacer.h ../../drivers/button.h ../../utils/tinygl.h
 	$(CC) -c $(CFLAGS) $< -o $@
 	
-play.o: play.c  ../../utils/pacer.h ../../utils/tinygl.h
+play.o: play.c  ../../utils/pacer.h ../../utils/tinygl.h ../../drivers/navswitch.h
 	$(CC) -c $(CFLAGS) $< -o $@
 	
 connect.o: connect.c ../../drivers/avr/ir_uart.h ../../utils/pacer.h   ../../fonts/font5x7_1.h ../../utils/font.h ../../utils/tinygl.h
@@ -70,12 +70,15 @@ ledmat.o: ../../drivers/ledmat.c ../../drivers/avr/pio.h ../../drivers/avr/syste
 
 button.o: ../../drivers/button.c ../../drivers/avr/pio.h ../../drivers/avr/system.h ../../drivers/button.h
 	$(CC) -c $(CFLAGS) $< -o $@
+
+navswitch.o: ../../drivers/navswitch.c ../../drivers/avr/delay.h ../../drivers/avr/pio.h ../../drivers/avr/system.h ../../drivers/navswitch.h
+	$(CC) -c $(CFLAGS) $< -o $@
 	
 
 
 
 # Link: create ELF output file from object files.
-game.out: game.o demo.o connect.o system.o timer.o pio.o pacer.o ir_uart.o timer0.o usart1.o timer.o prescale.o play.o led.o font.o tinygl.o display.o ledmat.o button.o
+game.out: game.o demo.o connect.o system.o timer.o pio.o pacer.o ir_uart.o timer0.o usart1.o timer.o prescale.o play.o led.o font.o tinygl.o display.o ledmat.o button.o navswitch.o
 	$(CC) $(CFLAGS) $^ -o $@ -lm
 	$(SIZE) $@
 

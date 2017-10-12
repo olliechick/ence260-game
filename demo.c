@@ -80,9 +80,11 @@ void play_demo (void)
     pacer_init (PACER_RATE);
     uint16_t ticker = 0; 
     uint8_t scene = 0;
+    
     while (1) {
-        
         pacer_wait();
+        
+        button_update(); //poll button
         
         // If button is pushed, return (skip the demo).
         if(button_push_event_p (BUTTON1))
@@ -109,7 +111,6 @@ void play_demo (void)
         
         
         tinygl_update(); //refresh screen
-        button_update(); //poll button
         ticker++;
         
     }

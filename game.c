@@ -47,10 +47,10 @@ int main (void) {
         if (connect()) {
             // Got an immediate connection, so we are player 2
             player_number = 2;
-            led_set (LED1, 0); //LED FOR DEBUG
+            led_set (LED1, 1); //LED FOR DEBUG
         } else {
             player_number = 1;
-            led_set (LED1, 1); //LED FOR DEBUG
+            led_set (LED1, 0); //LED FOR DEBUG
         }
         
         play(player_number);

@@ -6,6 +6,9 @@
 #include "navswitch.h"
 
 #define BOARD_SIZE 9
+#define ROW_SIZE 3
+#define COL_SIZE 3
+
 #define PACER_RATE 500 //Hz
 #define P2_FLIP_RATE 2 //Hz
 #define CURSOR_FLASH_RATE 5 //Hz
@@ -106,11 +109,14 @@ static void set_board_bitmap(bool flip, uint8_t cursor_position, bool cursor_on)
                 board_bitmap[row] &= ~(1 << (6 - 2*(i%3)));
                 board_bitmap[row] |= 1 << (5 - 2*(i%3));
             }
-                
+        } else {
+            //nothing is here
+            board_bitmap[row] &= ~(1 << (5 - 2*(i%3))) & ~(1 << (6 - 2*(i%3)));
         }
     }
 }
- 
+
+
  /** Displays the result as a face: either :), :(, or :| until the button is pushed */
 static void display_result(Result result) {
     board[0] = result; //DEBUG so it doesn't complain about unused variables
@@ -162,7 +168,19 @@ static Result your_turn (void)
     uint16_t ticker = 1; //Note this will overflow if PACER_RATE > 2^16 = 65536
     pacer_init(PACER_RATE);
     
-    // TEST configuration of board
+    // TEST configuration of board - empty board
+    board[0] = 0;
+    board[1] = 0;
+    board[2] = 0;
+    board[3] = 0;
+    board[4] = 0;
+    board[5] = 0;
+    board[6] = 0;
+    board[7] = 0;
+    board[8] = 0;
+    // ENDOF TEST configuration
+        
+    /*// TEST configuration of board
     board[0] = 1;
     board[1] = 2;
     board[2] = 0;
@@ -172,7 +190,7 @@ static Result your_turn (void)
     board[6] = 2;
     board[7] = 0;
     board[8] = 2;
-    // ENDOF TEST configuration
+    // ENDOF TEST configuration*/
     
     uint8_t cursor_position = find_init_cursor_position();
     
@@ -182,7 +200,37 @@ static Result your_turn (void)
     while (1) {
         pacer_wait();
         
+        navswitch_update ();
         
+        if (navswitch_push_event_p(NAVSWITCH_WEST)) {
+            // up a row
+            if (cursor_position >= ROW_SIZE) { //make sure it doesn't underflow into 2^8-3=253
+                cursor_position -= ROW_SIZE;
+            }
+            if (cursor_position < 0) {
+                cursor_position += ROW_SIZE; //off the board, restore
+            }
+        } else if (navswitch_push_event_p(NAVSWITCH_EAST)) {
+            // down a row
+            cursor_position += ROW_SIZE;
+            if (cursor_position >= BOARD_SIZE) {
+                cursor_position -= ROW_SIZE; //off the board, restore
+            }
+        } else if (navswitch_push_event_p(NAVSWITCH_NORTH)) {
+            // right a column
+            cursor_position++;
+            if (cursor_position%COL_SIZE == 0) {
+                cursor_position--; //overflow onto next row, restore
+            }
+        } else if (navswitch_push_event_p(NAVSWITCH_SOUTH)) {
+            // left a column
+            if (cursor_position != 0) { //make sure it doesn't underflow into 2^8-1=255
+                cursor_position--;
+            }
+            if (cursor_position%COL_SIZE == COL_SIZE - 1) {
+                cursor_position++; //overflow onto previous row, restore
+            }
+        }
         
         if (ticker % (PACER_RATE/P2_FLIP_RATE) == 0) {
             flip = !flip;
