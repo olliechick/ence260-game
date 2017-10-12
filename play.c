@@ -3,9 +3,12 @@
 
 #include "tinygl.h"
 #include "pacer.h"
+#include "navswitch.h"
 
 #define BOARD_SIZE 9
 #define PACER_RATE 500 //Hz
+#define P2_FLIP_RATE 2 //Hz
+#define CURSOR_FLASH_RATE 5 //Hz
 
 /** The game board */
 static uint8_t board[9] = {0};
@@ -159,7 +162,7 @@ static Result your_turn (void)
     uint16_t ticker = 1; //Note this will overflow if PACER_RATE > 2^16 = 65536
     pacer_init(PACER_RATE);
     
-    // TEST configuration of board and cursor
+    // TEST configuration of board
     board[0] = 1;
     board[1] = 2;
     board[2] = 0;
@@ -181,13 +184,12 @@ static Result your_turn (void)
         
         
         
-        if (ticker % (PACER_RATE/2) == 0) {
-            //Flip player 2's bit at 2Hz
+        if (ticker % (PACER_RATE/P2_FLIP_RATE) == 0) {
             flip = !flip;
             set_board_bitmap(flip, cursor_position, cursor_on);
             set_display(board_bitmap);
         }
-        if (ticker % (PACER_RATE/5) == 0) {
+        if (ticker % (PACER_RATE/CURSOR_FLASH_RATE) == 0) {
             //Flash the cursor at 5Hz
             cursor_on = !cursor_on;
             set_board_bitmap(flip, cursor_position, cursor_on);
