@@ -18,6 +18,7 @@ static uint8_t board[9] = {0};
 static uint8_t board_bitmap[5] = {0};
 
 typedef enum {NOT_FINISHED, PLAYER_1_WON, PLAYER_2_WON, TIE} Result;
+typedef enum {PLAYER_1, PLAYER_2} Player;
 
 /**
  * @return The result of the game based on the board so far
@@ -203,34 +204,29 @@ static Result your_turn (void)
         navswitch_update ();
         
         if (navswitch_push_event_p(NAVSWITCH_WEST)) {
-            // up a row
-            if (cursor_position >= ROW_SIZE) { //make sure it doesn't underflow into 2^8-3=253
+            // up a row (if it won't go off the board)
+            if (cursor_position >= ROW_SIZE) {
                 cursor_position -= ROW_SIZE;
             }
-            if (cursor_position < 0) {
-                cursor_position += ROW_SIZE; //off the board, restore
-            }
         } else if (navswitch_push_event_p(NAVSWITCH_EAST)) {
-            // down a row
-            cursor_position += ROW_SIZE;
-            if (cursor_position >= BOARD_SIZE) {
-                cursor_position -= ROW_SIZE; //off the board, restore
+            // down a row (if it won't go off the board)
+            if (cursor_position < BOARD_SIZE - ROW_SIZE) {
+                cursor_position += ROW_SIZE;
             }
         } else if (navswitch_push_event_p(NAVSWITCH_NORTH)) {
-            // right a column
-            cursor_position++;
-            if (cursor_position%COL_SIZE == 0) {
-                cursor_position--; //overflow onto next row, restore
+            // right a column (if it won't go off the board)
+            if (cursor_position%COL_SIZE != COL_SIZE - 1) {
+                cursor_position++;
             }
         } else if (navswitch_push_event_p(NAVSWITCH_SOUTH)) {
-            // left a column
-            if (cursor_position != 0) { //make sure it doesn't underflow into 2^8-1=255
+            // left a column (if it won't go off the board)
+            if (cursor_position%COL_SIZE != COL_SIZE) {
                 cursor_position--;
             }
-            if (cursor_position%COL_SIZE == COL_SIZE - 1) {
-                cursor_position++; //overflow onto previous row, restore
-            }
+        } else if (navswitch_push_event_p(NAVSWITCH_PUSH)) {
+            cursor_position = 0;
         }
+            
         
         if (ticker % (PACER_RATE/P2_FLIP_RATE) == 0) {
             flip = !flip;

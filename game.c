@@ -1,3 +1,5 @@
+#include <stdbool.h>
+
 #include "system.h"
 #include "led.h"
 #include "tinygl.h"
@@ -20,7 +22,7 @@ void initialise(void) {
     
     /* LED */
     led_init();
-    led_set (LED1, 0); //turn off LED
+    led_set (LED1, false); //turn off LED
     
     /* TinyGL */
     tinygl_init(LOOP_RATE);
@@ -37,20 +39,20 @@ int main (void) {
     initialise();
     
     while (1) {
-        led_set (LED1, 1); //LED FOR DEBUG
+        led_set (LED1, true); //LED FOR DEBUG
         play_demo(); //returns when button is pushed
-        led_set (LED1, 0); //LED FOR DEBUG
+        led_set (LED1, false); //LED FOR DEBUG
         
 
         //Check what player you are
-        uint8_t player_number; // player number (1 or 2)
+        Player player; // player number (PLAYER_1 or PLAYER_2)
         if (connect()) {
             // Got an immediate connection, so we are player 2
-            player_number = 2;
-            led_set (LED1, 1); //LED FOR DEBUG
+            player = PLAYER_2;
+            led_set (LED1, true); //LED FOR DEBUG
         } else {
-            player_number = 1;
-            led_set (LED1, 0); //LED FOR DEBUG
+            player = PLAYER_1;
+            led_set (LED1, false); //LED FOR DEBUG
         }
         
         play(player_number);
