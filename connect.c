@@ -99,7 +99,7 @@ static void send(void) {
  *      
  */
 bool connect(void) {
-    return false; //DEBUG auto-"connect" - we are player 1 */
+    //return false; //DEBUG auto-"connect" - we are player 1
     
     pacer_init(SEND_FREQUENCY); //Initialize pacer to SEND_FREQUENCY
     

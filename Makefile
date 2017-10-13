@@ -23,7 +23,7 @@ game.o: game.c demo.h connect.h play.h ../../drivers/avr/system.h ../../drivers/
 demo.o: demo.c ../../drivers/avr/pio.h ../../drivers/avr/system.h ../../utils/pacer.h ../../drivers/button.h ../../utils/tinygl.h
 	$(CC) -c $(CFLAGS) $< -o $@
 	
-play.o: play.c  ../../utils/pacer.h ../../utils/tinygl.h ../../drivers/navswitch.h ../../drivers/led.h
+play.o: play.c  ../../utils/pacer.h ../../utils/tinygl.h ../../drivers/navswitch.h ../../drivers/led.h ../../drivers/avr/ir_uart.h
 	$(CC) -c $(CFLAGS) $< -o $@
 	
 connect.o: connect.c ../../drivers/avr/ir_uart.h ../../utils/pacer.h   ../../fonts/font5x7_1.h ../../utils/font.h ../../utils/tinygl.h

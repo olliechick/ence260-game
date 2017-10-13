@@ -5,13 +5,14 @@
 #include "pacer.h"
 #include "navswitch.h"
 #include "led.h"
+#include "ir_uart.h"
 
 #define BOARD_SIZE 9
 #define ROW_SIZE 3
 #define COL_SIZE 3
 
 #define PACER_RATE 500 //Hz
-#define P2_FLIP_RATE 2 //Hz
+#define P2_FLASH_RATE 2 //Hz
 #define CURSOR_FLASH_RATE 5 //Hz
 
 /** The game board */
@@ -76,8 +77,14 @@ static Result get_result(void) {
     return NOT_FINISHED;
 }
 
-/** Updates board_bitmap based on board */
-static void set_board_bitmap(bool flip, uint8_t cursor_position, bool cursor_on)
+/** 
+ * Updates board_bitmap based on the board, the position of the cursor,
+ * and whether flashing elements are on or off.
+ * @param p2_on true if player 2's LEDs should be turned on
+ * @param cursor_position the position (as an index of board) of the cursor
+ * @param cursor_on true if the cursor should be turned on
+ */
+static void set_board_bitmap(bool p2_on, uint8_t cursor_position, bool cursor_on)
 {
     int i;
     int row;
@@ -106,7 +113,7 @@ static void set_board_bitmap(bool flip, uint8_t cursor_position, bool cursor_on)
             board_bitmap[row] |= 1 << (5 - 2*(i%3)) | 1 << (6 - 2*(i%3));
         } else if (board[i] == 2) {
             // player 2 is here
-            if (flip) {
+            if (p2_on) {
                 board_bitmap[row] |= (1 << (5 - 2*(i%3)));
                 board_bitmap[row] |= 1 << (6 - 2*(i%3));
             } else {
@@ -118,14 +125,6 @@ static void set_board_bitmap(bool flip, uint8_t cursor_position, bool cursor_on)
             board_bitmap[row] &= ~(1 << (5 - 2*(i%3))) & ~(1 << (6 - 2*(i%3)));
         }
     }
-}
-
-
- /** Displays the result as a face: either :), :(, or :| until the button is pushed */
-static void display_result(Result result) {
-    board[0] = result; //DEBUG so it doesn't complain about unused variables
-    //TODO
-    return;
 }
 
 /** 
@@ -143,6 +142,19 @@ static void set_display(const uint8_t bitmap[])
         }
     }
     return;
+}
+
+/** 
+ * Turns on the LED if the cursor is in an empty slot,
+ * otherwise turns it off
+ * @param cursor_position the position (as an index of board) of the cursor
+ */
+static void update_led(uint8_t cursor_position) {
+    if (board[cursor_position] == 0) {
+        led_set (LED1, true);
+    } else {
+        led_set (LED1, false);
+    }
 }
 
 /**
@@ -167,116 +179,78 @@ static uint8_t find_init_cursor_position(void) {
  */
 static Result your_turn (void)
 {   
-    bool flip = false;
+    bool p2_on = false;
     bool cursor_on = false;
-    uint16_t ticker = 1; //Note this will overflow if PACER_RATE > 2^16 = 65536
+    uint16_t ticker = 1; //Note this will overflow if PACER_RATE > 2^16-1 = 65535
     pacer_init(PACER_RATE);
-    /*
-    // TEST configuration of board - empty board
-    board[0] = 0;
-    board[1] = 0;
-    board[2] = 0;
-    board[3] = 0;
-    board[4] = 0;
-    board[5] = 0;
-    board[6] = 1;
-    board[7] = 0;
-    board[8] = 2;
-    // ENDOF TEST configuration
-       /* 
-    // TEST configuration of board
-    board[0] = 1;
-    board[1] = 2;
-    board[2] = 0;
-    board[3] = 0;
-    board[4] = 1;
-    board[5] = 1;
-    board[6] = 2;
-    board[7] = 0;
-    board[8] = 2;
-    // ENDOF TEST configuration*/
     
     uint8_t cursor_position = find_init_cursor_position();
     
-    set_board_bitmap(flip, cursor_position, cursor_on);
+    set_board_bitmap(p2_on, cursor_position, cursor_on);
     set_display(board_bitmap);
+    update_led(cursor_position);
     
     while (1) {
         pacer_wait();
         
-        navswitch_update ();
+        navswitch_update();
+        tinygl_update();
         
+        // Deal with navswitch pushes
         if (navswitch_push_event_p(NAVSWITCH_WEST)) {
             // up a row (if it won't go off the board)
             if (cursor_position >= ROW_SIZE) {
                 cursor_position -= ROW_SIZE;
             }
-            if (board[cursor_position] == 0) {
-                led_set (LED1, true);
-            } else {
-                led_set (LED1, false);
-            }
-                
+            update_led(cursor_position);
         } else if (navswitch_push_event_p(NAVSWITCH_EAST)) {
             // down a row (if it won't go off the board)
             if (cursor_position < BOARD_SIZE - ROW_SIZE) {
                 cursor_position += ROW_SIZE;
             }
-            if (board[cursor_position] == 0) {
-                led_set (LED1, true);
-            } else {
-                led_set (LED1, false);
-            }
+            update_led(cursor_position);
         } else if (navswitch_push_event_p(NAVSWITCH_NORTH)) {
             // right a column (if it won't go off the board)
             if (cursor_position%COL_SIZE != COL_SIZE - 1) {
                 cursor_position++;
             }
-            if (board[cursor_position] == 0) {
-                led_set (LED1, true);
-            } else {
-                led_set (LED1, false);
-            }
+            update_led(cursor_position);
         } else if (navswitch_push_event_p(NAVSWITCH_SOUTH)) {
             // left a column (if it won't go off the board)
             if (cursor_position%COL_SIZE != COL_SIZE) {
                 cursor_position--;
             }
-            if (board[cursor_position] == 0) {
-                led_set (LED1, true);
-            } else {
-                led_set (LED1, false);
-            }
+            update_led(cursor_position);
         } else if (navswitch_push_event_p(NAVSWITCH_PUSH)) {
             if (board[cursor_position] == 0) {
                 //valid position
                 board[cursor_position] = player;
-                set_board_bitmap(flip, cursor_position, cursor_on);
+                set_board_bitmap(p2_on, cursor_position, cursor_on);
                 set_display(board_bitmap);
+                ir_uart_putc(cursor_position); //send result to other player
                 return get_result();
-            } else {
-                //invalid position
             }
         }
             
-        
-        if (ticker % (PACER_RATE/P2_FLIP_RATE) == 0) {
-            flip = !flip;
-            set_board_bitmap(flip, cursor_position, cursor_on);
+        // Flashing LEDs
+        if (ticker % (PACER_RATE/P2_FLASH_RATE) == 0) {
+            // Flash player 2's LEDs
+            p2_on = !p2_on;
+            set_board_bitmap(p2_on, cursor_position, cursor_on);
             set_display(board_bitmap);
         }
         if (ticker % (PACER_RATE/CURSOR_FLASH_RATE) == 0) {
-            //Flash the cursor at 5Hz
+            // Flash the cursor
             cursor_on = !cursor_on;
-            set_board_bitmap(flip, cursor_position, cursor_on);
+            set_board_bitmap(p2_on, cursor_position, cursor_on);
             set_display(board_bitmap);
         }
+        
+        //Reset ticker every second to prevent overflow
         if (ticker % PACER_RATE == 0) {
-            //Reset ticker every 1Hz to prevent overflow
             ticker = 1;
         }
         
-        tinygl_update();
         ticker++;
     }
 }
@@ -287,8 +261,51 @@ static Result your_turn (void)
  * @return the current result of the game
  */
 static Result other_players_turn (void) {
-    //TODO
-    return get_result();
+    //return get_result(); //DEBUG just ignore other player's turn
+    while (1) {
+        // Try and get a response
+        if (ir_uart_read_ready_p()) {
+            int i;
+            // Iterate through valid board array indices
+            for (i = 0; i < BOARD_SIZE; i++) {
+                if (ir_uart_getc() == i) {
+                    // Got a valid board array index
+                    // This is where the other player went, so put
+                    // them there on the board.
+                    if (player == PLAYER_1) {
+                        board[i] = PLAYER_2;
+                    } else {
+                        board[i] = PLAYER_1;
+                    }
+                    // TODO try uncommenting the below line if the board doesn't
+                    // update (maybe when the other player wins?)
+                    //set_board_bitmap(p2_on, cursor_position, cursor_on);
+                    return get_result();
+                } 
+            }
+        }
+    }
+}
+
+
+ /** Displays the result as a face: either :), :(, or :| until the button is pushed */
+static void display_result(Result result) {
+    if ((result == PLAYER_1_WON && player == PLAYER_1) ||
+        (result == PLAYER_2_WON && player == PLAYER_2)) {
+        // Won
+        // TODO display :)
+    } else if ((result == PLAYER_1_WON && player == PLAYER_2) ||
+        (result == PLAYER_2_WON && player == PLAYER_1)) {
+        // Lost
+        // TODO display :(
+    } else if (result == TIE) {
+        // Tie
+        // TODO display :|
+    }
+    while (1) {
+        //TODO return when the button is pushed
+        return;
+    }
 }
 
 
@@ -299,6 +316,12 @@ void play(Player thisPlayer) {
     
     Result result = NOT_FINISHED;
     bool currentPlayersTurn;
+    
+    // Clear the board
+    int i;
+    for (i = 0; i < BOARD_SIZE; i++) {
+        board[i] = 0;
+    } 
     
     // If this is player 1, it is your turn. Otherwise it's not.
     currentPlayersTurn = (player == PLAYER_1);
