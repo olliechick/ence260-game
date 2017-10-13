@@ -181,7 +181,7 @@ static Result your_turn (void)
     board[8] = 0;
     // ENDOF TEST configuration
         
-    /*// TEST configuration of board
+    // TEST configuration of board
     board[0] = 1;
     board[1] = 2;
     board[2] = 0;

@@ -55,7 +55,7 @@ int main (void) {
             led_set (LED1, false); //LED FOR DEBUG
         }
         
-        play(player_number);
+        play(player);
             
     }
     
