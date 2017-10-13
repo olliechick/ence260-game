@@ -9,6 +9,7 @@
 #include "tinygl.h"
 #include "pacer.h"
 #include "navswitch.h"
+#include "led.h"
 
 #define BOARD_SIZE 9
 #define ROW_SIZE 3
@@ -19,10 +20,9 @@
 #define CURSOR_FLASH_RATE 5 //Hz
 
 typedef enum {NOT_FINISHED, PLAYER_1_WON, PLAYER_2_WON, TIE} Result;
-typedef enum {PLAYER_1, PLAYER_2} Player;
+typedef enum {PLAYER_1 = 1, PLAYER_2 = 2} Player;
 
 /** Main game loop (and endgame). */ 
-void play(uint8_t player_number);
-
+void play(Player thisPlayer);
 
 #endif

@@ -5,10 +5,10 @@
  * @brief Connects to another funkit
  */
 
-#include "ir_uart.h"
 #include <stdbool.h>
-#include "led.h" //LED FOR DEBUG
 
+#include "ir_uart.h"
+#include "led.h" //LED FOR DEBUG
 #include "system.h"
 #include "pacer.h"
 #include "tinygl.h"
@@ -17,6 +17,7 @@
 #define SEND_FREQUENCY 500 //Hz
 #define MILLISECS_IN_A_SEC 1000
 #define DELAY 5000 // wait time in milliseconds to get signal
+#define PAUSE_TIME 1 //ms pause time before reading IR signal
 
 /**
  * Checks if the other kit is sending
@@ -42,6 +43,7 @@ static bool check_if_sending(void) {
         {
             if (ir_uart_getc() == 's') {
                 // other kit was already sending
+                pacer_wait(); // wait one pace
                 ir_uart_putc('a'); //send acknowledgement
                 tinygl_clear();
                 tinygl_update();
@@ -68,19 +70,21 @@ static void send(void) {
     {
         pacer_wait();
         tinygl_update();
+        
+        //Try and get a response
+        if (ir_uart_read_ready_p())
+        {
+            if (ir_uart_getc() == 'a') {
+                //They have accepted the signal
+                tinygl_clear();
+                tinygl_update();
+                return;
+            } 
+        }
+        
         //Every 2^8 = 256 loops (to ensure ledmat doesn't flicker):
         if (ticker == 0) {
             ir_uart_putc('s'); //send 
-            //Try and get a response
-            if (ir_uart_read_ready_p())
-            {
-                if (ir_uart_getc() == 'a') {
-                    //They have accepted the signal
-                    tinygl_clear();
-                    tinygl_update();
-                    return;
-                } 
-            }
         }
         ticker++;
     }
@@ -95,7 +99,7 @@ static void send(void) {
  *      
  */
 bool connect(void) {
-    /* return false; //DEBUG auto-"connect" - we are player 1 */
+    return false; //DEBUG auto-"connect" - we are player 1 */
     
     pacer_init(SEND_FREQUENCY); //Initialize pacer to SEND_FREQUENCY
     

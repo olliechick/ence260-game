@@ -19,7 +19,9 @@ static uint8_t board[9] = {0};
 static uint8_t board_bitmap[5] = {0};
 
 typedef enum {NOT_FINISHED, PLAYER_1_WON, PLAYER_2_WON, TIE} Result;
-typedef enum {PLAYER_1, PLAYER_2} Player;
+typedef enum {PLAYER_1 = 1, PLAYER_2 = 2} Player;
+
+static Player player;
 
 /**
  * @return The result of the game based on the board so far
@@ -169,7 +171,7 @@ static Result your_turn (void)
     bool cursor_on = false;
     uint16_t ticker = 1; //Note this will overflow if PACER_RATE > 2^16 = 65536
     pacer_init(PACER_RATE);
-    
+    /*
     // TEST configuration of board - empty board
     board[0] = 0;
     board[1] = 0;
@@ -177,11 +179,11 @@ static Result your_turn (void)
     board[3] = 0;
     board[4] = 0;
     board[5] = 0;
-    board[6] = 0;
+    board[6] = 1;
     board[7] = 0;
-    board[8] = 0;
+    board[8] = 2;
     // ENDOF TEST configuration
-        
+       /* 
     // TEST configuration of board
     board[0] = 1;
     board[1] = 2;
@@ -209,30 +211,51 @@ static Result your_turn (void)
             if (cursor_position >= ROW_SIZE) {
                 cursor_position -= ROW_SIZE;
             }
+            if (board[cursor_position] == 0) {
+                led_set (LED1, true);
+            } else {
+                led_set (LED1, false);
+            }
+                
         } else if (navswitch_push_event_p(NAVSWITCH_EAST)) {
             // down a row (if it won't go off the board)
             if (cursor_position < BOARD_SIZE - ROW_SIZE) {
                 cursor_position += ROW_SIZE;
+            }
+            if (board[cursor_position] == 0) {
+                led_set (LED1, true);
+            } else {
+                led_set (LED1, false);
             }
         } else if (navswitch_push_event_p(NAVSWITCH_NORTH)) {
             // right a column (if it won't go off the board)
             if (cursor_position%COL_SIZE != COL_SIZE - 1) {
                 cursor_position++;
             }
+            if (board[cursor_position] == 0) {
+                led_set (LED1, true);
+            } else {
+                led_set (LED1, false);
+            }
         } else if (navswitch_push_event_p(NAVSWITCH_SOUTH)) {
             // left a column (if it won't go off the board)
             if (cursor_position%COL_SIZE != COL_SIZE) {
                 cursor_position--;
             }
+            if (board[cursor_position] == 0) {
+                led_set (LED1, true);
+            } else {
+                led_set (LED1, false);
+            }
         } else if (navswitch_push_event_p(NAVSWITCH_PUSH)) {
             if (board[cursor_position] == 0) {
                 //valid position
-                led_set (LED1, false); //LED FOR DEBUG
-                board[cursor_position] == PLAYER_1; //TODO set to current player
+                board[cursor_position] = player;
+                set_board_bitmap(flip, cursor_position, cursor_on);
+                set_display(board_bitmap);
                 return get_result();
             } else {
                 //invalid position
-                led_set (LED1, true); //LED FOR DEBUG
             }
         }
             
@@ -270,7 +293,9 @@ static Result other_players_turn (void) {
 
 
 /** Main game loop (and endgame). */ 
-void play(Player player) {
+void play(Player thisPlayer) {
+
+    player = thisPlayer; //assign player (globally)
     
     Result result = NOT_FINISHED;
     bool currentPlayersTurn;

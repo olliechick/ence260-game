@@ -73,8 +73,6 @@ button.o: ../../drivers/button.c ../../drivers/avr/pio.h ../../drivers/avr/syste
 
 navswitch.o: ../../drivers/navswitch.c ../../drivers/avr/delay.h ../../drivers/avr/pio.h ../../drivers/avr/system.h ../../drivers/navswitch.h
 	$(CC) -c $(CFLAGS) $< -o $@
-	
-
 
 
 # Link: create ELF output file from object files.
