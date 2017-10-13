@@ -104,11 +104,11 @@ static void set_board_bitmap(bool flip, uint8_t cursor_position, bool cursor_on)
         } else if (board[i] == 2) {
             // player 2 is here
             if (flip) {
-                board_bitmap[row] &= ~(1 << (5 - 2*(i%3)));
+                board_bitmap[row] |= (1 << (5 - 2*(i%3)));
                 board_bitmap[row] |= 1 << (6 - 2*(i%3));
             } else {
                 board_bitmap[row] &= ~(1 << (6 - 2*(i%3)));
-                board_bitmap[row] |= 1 << (5 - 2*(i%3));
+                board_bitmap[row] &= ~(1 << (5 - 2*(i%3)));
             }
         } else {
             //nothing is here
