@@ -4,6 +4,7 @@
 #include "tinygl.h"
 #include "pacer.h"
 #include "navswitch.h"
+#include "led.h"
 
 #define BOARD_SIZE 9
 #define ROW_SIZE 3
@@ -224,7 +225,15 @@ static Result your_turn (void)
                 cursor_position--;
             }
         } else if (navswitch_push_event_p(NAVSWITCH_PUSH)) {
-            cursor_position = 0;
+            if (board[cursor_position] == 0) {
+                //valid position
+                led_set (LED1, false); //LED FOR DEBUG
+                board[cursor_position] == PLAYER_1; //TODO set to current player
+                return get_result();
+            } else {
+                //invalid position
+                led_set (LED1, true); //LED FOR DEBUG
+            }
         }
             
         
@@ -247,8 +256,6 @@ static Result your_turn (void)
         tinygl_update();
         ticker++;
     }
-    
-    return get_result();
 }
 
 /**
@@ -263,13 +270,13 @@ static Result other_players_turn (void) {
 
 
 /** Main game loop (and endgame). */ 
-void play(uint8_t player_number) {
+void play(Player player) {
     
     Result result = NOT_FINISHED;
     bool currentPlayersTurn;
     
     // If this is player 1, it is your turn. Otherwise it's not.
-    currentPlayersTurn = (player_number == 1);
+    currentPlayersTurn = (player == PLAYER_1);
     
     // Loop until finished
     while (result == NOT_FINISHED) {
