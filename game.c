@@ -39,20 +39,15 @@ int main (void) {
     initialise();
     
     while (1) {
-        led_set (LED1, true); //LED FOR DEBUG
         play_demo(); //returns when button is pushed
-        led_set (LED1, false); //LED FOR DEBUG
-        
 
         //Check what player you are
         Player player; // player number (PLAYER_1 or PLAYER_2)
         if (connect()) {
             // Got an immediate connection, so we are player 2
             player = PLAYER_2;
-            led_set (LED1, true); //LED FOR DEBUG
         } else {
             player = PLAYER_1;
-            led_set (LED1, false); //LED FOR DEBUG
         }
         
         play(player);

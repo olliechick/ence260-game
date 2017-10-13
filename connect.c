@@ -8,7 +8,6 @@
 #include <stdbool.h>
 
 #include "ir_uart.h"
-#include "led.h" //LED FOR DEBUG
 #include "system.h"
 #include "pacer.h"
 #include "tinygl.h"
