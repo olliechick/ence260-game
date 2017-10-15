@@ -157,9 +157,9 @@ static void set_display(const uint8_t bitmap[])
  */
 static void update_led(uint8_t cursor_position) {
     if (board[cursor_position] == 0) {
-        led_set (LED1, true);
-    } else {
         led_set (LED1, false);
+    } else {
+        led_set (LED1, true);
     }
 }
 
