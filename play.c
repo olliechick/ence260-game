@@ -302,16 +302,16 @@ static void display_result(Result result) {
         (result == PLAYER_2_WON && player == PLAYER_2)) {
         // Won
         // TODO display :)
-        tinygl_text(":) win!");
+        tinygl_text("WINNER");
     } else if ((result == PLAYER_1_WON && player == PLAYER_2) ||
         (result == PLAYER_2_WON && player == PLAYER_1)) {
         // Lost
         // TODO display :(
-        tinygl_text(":( lose");
+        tinygl_text("LOSER");
     } else if (result == TIE) {
         // Tie
         // TODO display :|
-        tinygl_text(":I tie");
+        tinygl_text("TIE");
     }
     while (1) {
         //TODO return when the button is pushed
