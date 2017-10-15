@@ -13,6 +13,8 @@
 #include "tinygl.h"
 #include "button.h"
 
+#include "../fonts/font5x7_1.h"
+
 #define PACER_RATE 500 //Hz
 #define MILLISECS_IN_A_SEC 1000
 #define TIME_BETWEEN_FRAMES 2000 //milliseconds between each frame in demo
@@ -76,13 +78,16 @@ void play_demo (void)
 {
     uint32_t ticks_before_scene_change = 1000;//(PACER_RATE * TIME_BETWEEN_FRAMES)/MILLISECS_IN_A_SEC;
     
-    set_display(scene0);
+    //set_display(scene0);
+    tinygl_text("Testing 1 2 3");
+
     pacer_init (PACER_RATE);
     uint16_t ticker = 0; 
     uint8_t scene = 0;
     
     while (1) {
         pacer_wait();
+        tinygl_update();
         
         button_update(); //poll button
         
