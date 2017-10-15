@@ -7,6 +7,12 @@
 #include "led.h"
 #include "ir_uart.h"
 
+#include "system.h"
+#include "pio.h"
+#include "button.h"
+
+#include "../fonts/font5x7_1.h"
+
 #define BOARD_SIZE 9
 #define ROW_SIZE 3
 #define COL_SIZE 3
@@ -261,7 +267,7 @@ static Result your_turn (void)
  * @return the current result of the game
  */
 static Result other_players_turn (void) {
-    //return get_result(); //DEBUG just ignore other player's turn
+    return get_result(); //DEBUG just ignore other player's turn
     while (1) {
         // Try and get a response
         if (ir_uart_read_ready_p()) {
@@ -290,21 +296,36 @@ static Result other_players_turn (void) {
 
  /** Displays the result as a face: either :), :(, or :| until the button is pushed */
 static void display_result(Result result) {
+    
+    tinygl_clear();
     if ((result == PLAYER_1_WON && player == PLAYER_1) ||
         (result == PLAYER_2_WON && player == PLAYER_2)) {
         // Won
         // TODO display :)
+        tinygl_text(":) win!");
     } else if ((result == PLAYER_1_WON && player == PLAYER_2) ||
         (result == PLAYER_2_WON && player == PLAYER_1)) {
         // Lost
         // TODO display :(
+        tinygl_text(":( lose");
     } else if (result == TIE) {
         // Tie
         // TODO display :|
+        tinygl_text(":I tie");
     }
     while (1) {
         //TODO return when the button is pushed
-        return;
+        pacer_wait();
+        tinygl_update();
+
+        button_update();
+        
+        if(button_push_event_p (BUTTON1))
+        {
+            tinygl_clear();
+            tinygl_update();
+			return;
+		}
     }
 }
 
