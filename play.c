@@ -223,7 +223,7 @@ static Result your_turn (void)
             update_led(cursor_position);
         } else if (navswitch_push_event_p(NAVSWITCH_SOUTH)) {
             // left a column (if it won't go off the board)
-            if (cursor_position%COL_SIZE != COL_SIZE) {
+            if (cursor_position%COL_SIZE != 0) {
                 cursor_position--;
             }
             update_led(cursor_position);
