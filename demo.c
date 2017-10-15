@@ -43,6 +43,7 @@ static const uint8_t arrow[] =
     // |.......|
     // |.......|
 
+/**
 static const uint8_t scene0[] = 
 {
     72, 73, 120, 73, 73
@@ -54,7 +55,7 @@ static const uint8_t scene0[] =
     // |@..@..@|
     // |@..@..@|
 };
-    
+**/
 
 /** 
  * Sets the display (cell by cell) given a bitmap.
@@ -76,10 +77,10 @@ static void set_display(const uint8_t bitmap[])
 /** Plays the demo and returns when the button is pressed. */
 void play_demo (void)
 {
-    uint32_t ticks_before_scene_change = 1000;//(PACER_RATE * TIME_BETWEEN_FRAMES)/MILLISECS_IN_A_SEC;
+    uint32_t ticks_before_scene_change = 4500;//(PACER_RATE * TIME_BETWEEN_FRAMES)/MILLISECS_IN_A_SEC;
     
     //set_display(scene0);
-    tinygl_text("Testing 1 2 3");
+    tinygl_text("  Tic-tac-toe!    ");
 
     pacer_init (PACER_RATE);
     uint16_t ticker = 0; 
@@ -103,6 +104,7 @@ void play_demo (void)
         if (ticker == ticks_before_scene_change) {
             switch (scene) {
                 case 0:
+                    tinygl_clear();
                     set_display(arrow);
                     break;
                 default:
