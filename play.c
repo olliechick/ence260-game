@@ -267,7 +267,7 @@ static Result your_turn (void)
  * @return the current result of the game
  */
 static Result other_players_turn (void) {
-    return get_result(); //DEBUG just ignore other player's turn
+    //return get_result(); //DEBUG just ignore other player's turn
     while (1) {
         // Try and get a response
         if (ir_uart_read_ready_p()) {
