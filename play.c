@@ -25,6 +25,11 @@
 static uint8_t board[9] = {0};
 static uint8_t board_bitmap[5] = {0};
 
+static bool p2_on = false;
+static bool cursor_on = false;
+static uint8_t cursor_position = 0;
+static uint16_t ticker = 1; //Note this will overflow if PACER_RATE > 2^16-1 = 65535
+
 typedef enum {NOT_FINISHED, PLAYER_1_WON, PLAYER_2_WON, TIE} Result;
 typedef enum {PLAYER_1 = 1, PLAYER_2 = 2} Player;
 
@@ -185,12 +190,9 @@ static uint8_t find_init_cursor_position(void) {
  */
 static Result your_turn (void)
 {   
-    bool p2_on = false;
-    bool cursor_on = false;
-    uint16_t ticker = 1; //Note this will overflow if PACER_RATE > 2^16-1 = 65535
     pacer_init(PACER_RATE);
     
-    uint8_t cursor_position = find_init_cursor_position();
+    cursor_position = find_init_cursor_position();
     
     set_board_bitmap(p2_on, cursor_position, cursor_on);
     set_display(board_bitmap);
@@ -300,6 +302,8 @@ static Result your_turn (void)
 static Result other_players_turn (void) {
     //return get_result(); //DEBUG just ignore other player's turn
     while (1) {
+        pacer_wait();
+        tinygl_update();
         // Try and get a response
         if (ir_uart_read_ready_p()) {
             int i;
@@ -327,6 +331,22 @@ static Result other_players_turn (void) {
                 } 
             }
         }
+
+        
+        // Flashing LEDs
+        if (ticker % (PACER_RATE/P2_FLASH_RATE) == 0) {
+            // Flash player 2's LEDs
+            p2_on = !p2_on;
+            set_board_bitmap(p2_on, cursor_position, cursor_on);
+            set_display(board_bitmap);
+        }
+        cursor_on = false;
+        //Reset ticker every second to prevent overflow
+        if (ticker % PACER_RATE == 0) {
+            ticker = 1;
+        }
+        
+        ticker++;
     }
 }
 
