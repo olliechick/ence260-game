@@ -73,12 +73,16 @@ static void send(void) {
         //Try and get a response
         if (ir_uart_read_ready_p())
         {
-            if (ir_uart_getc() == 'a') {
+            char received_char = ir_uart_getc();
+            if (received_char == 'a') {
                 //They have accepted the signal
                 tinygl_clear();
                 tinygl_update();
                 return;
-            } 
+            } else if (received_char == 's') {
+                //they are trying to send too
+                check_if_sending();
+            }
         }
         
         //Every 2^8 = 256 loops (to ensure ledmat doesn't flicker):
