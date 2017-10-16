@@ -20,7 +20,7 @@
 
 /**
  * Checks if the other kit is sending
- * @return true if it gets a signal from the other kit
+ * @return true if it gets a signal 's' from the other kit
  */
 static bool check_if_sending(void) {
     
@@ -57,8 +57,11 @@ static bool check_if_sending(void) {
     return false;
 }
 
-/** Sends to the other kit until it gets an acknowledgement signal back */
-static void send(void) {
+/**
+ * Sends to the other kit until it gets an acknowledgement signal back
+ * @return true if it gets a signal 's' from the other kit
+  */
+static bool send(void) {
     
     tinygl_draw_char('S', tinygl_point(0, 0));
     
@@ -78,10 +81,11 @@ static void send(void) {
                 //They have accepted the signal
                 tinygl_clear();
                 tinygl_update();
-                return;
+                return false;
             } else if (received_char == 's') {
                 //they are trying to send too
                 check_if_sending();
+                return true;
             }
         }
         
@@ -109,9 +113,11 @@ bool connect(void) {
     if (check_if_sending()) {
         // Received a signal
         return true;
-    } else {
+    } else if (send()){ /*
         // No signal received
-        send(); //keep sending until they send back an ack
+        send(); //keep sending until they send back an ack*/
+        return true;
+    } else {
         return false;
     }
 }

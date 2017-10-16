@@ -13,9 +13,9 @@
 
 #include "../fonts/font5x7_1.h"
 
-#define BOARD_SIZE 9
 #define ROW_SIZE 3
 #define COL_SIZE 3
+#define BOARD_SIZE (ROW_SIZE * COL_SIZE)
 
 #define PACER_RATE 500 //Hz
 #define P2_FLASH_RATE 2 //Hz
@@ -156,8 +156,8 @@ static void set_display(const uint8_t bitmap[])
 }
 
 /** 
- * Turns on the LED if the cursor is in an empty slot,
- * otherwise turns it off
+ * Turns on the LED if the cursor is in an occupied slot,
+ * otherwise turns it off.
  * @param cursor_position the position (as an index of board) of the cursor
  */
 static void update_led(uint8_t cursor_position) {
@@ -340,7 +340,10 @@ static Result other_players_turn (void) {
             set_board_bitmap(p2_on, cursor_position, cursor_on);
             set_display(board_bitmap);
         }
+         //move the cursor off the board and turn it off
         cursor_on = false;
+        cursor_position = BOARD_SIZE;
+        
         //Reset ticker every second to prevent overflow
         if (ticker % PACER_RATE == 0) {
             ticker = 1;
@@ -351,32 +354,29 @@ static Result other_players_turn (void) {
 }
 
 
- /** Displays the result as a face: either :), :(, or :| until the button is pushed */
+ /** Displays the result until the button is pushed */
 static void display_result(Result result) {
     
     tinygl_clear();
     if ((result == PLAYER_1_WON && player == PLAYER_1) ||
         (result == PLAYER_2_WON && player == PLAYER_2)) {
         // Won
-        // TODO display :)
         tinygl_text("WINNER");
     } else if ((result == PLAYER_1_WON && player == PLAYER_2) ||
         (result == PLAYER_2_WON && player == PLAYER_1)) {
         // Lost
-        // TODO display :(
         tinygl_text("LOSER");
     } else if (result == TIE) {
         // Tie
-        // TODO display :|
         tinygl_text("TIE");
     }
     while (1) {
-        //TODO return when the button is pushed
         pacer_wait();
+        
         tinygl_update();
-
         button_update();
         
+        //Return when the button is pushed
         if(button_push_event_p (BUTTON1))
         {
             tinygl_clear();
