@@ -22,6 +22,8 @@
 #define COL_SIZE 3
 #define BOARD_SIZE (ROW_SIZE * COL_SIZE)
 
+/* The indices of the rows of LEDs that */
+
 /* Pacer rate in Hz. */
 #define PACER_RATE 500
 /* The rate that player 2's pieces flash, in Hz. */
@@ -33,60 +35,134 @@
 static uint8_t board[9] = {0};
 /* The bitmap of the board. */
 static uint8_t board_bitmap[5] = {0};
+/* The rows of LEDs used in each row of the game. */
+static uint8_t rows[ROW_SIZE];
 /* Position of cursor on the board. */
 static uint8_t cursor_position = 0;
-static uint16_t ticker = 1; //Note this will overflow if PACER_RATE > 2^16-1 = 65535
+/* The current player. */
+static Player player;
+/* Ticker - used to control flashing. Note this will overflow if PACER_RATE > 2^16-1 = 65k */
+static uint16_t ticker = 1;
 /* Bools to control flashing of player 2 and the cursor - on or off. */
 static bool p2_on = false;
 static bool cursor_on = false;
 
+/* The result of a game. */
 typedef enum {NOT_FINISHED, PLAYER_1_WON, PLAYER_2_WON, TIE} Result;
+
+/* The players - how they are stored in the board. */
 typedef enum {PLAYER_1 = 1, PLAYER_2 = 2} Player;
 
-static Player player;
+/* @param player the player who won
+   @return the result where the player passed in wins
+*/
+static Result toWinner(Player player) {
+    if (player = PLAYER_1) {
+        return PLAYER_1_WON;
+    } else if (player == PLAYER_2) {
+        return PLAYER_2_WON;
+    }
+}
 
-/**
- * @return The result of the game based on the board so far
+
+/* @return The result of the game based on the board so far
  */
 static Result get_result(void) {
+
+    /* Index used in for-loops. */
+    int i;
+    /* Index used in nesteed for-loops. */
+    int j;
+    /* The value of the first cell in a row/col/diagonal. */
+    int first_cell;
+    /* True if all the cells in a row/col/diagonal are the same. */
+    bool all_the_same;
     
-    int i; //index used in for loops
-    
-    // Check for three in a row on the rows (012, 345, 678)
-    for (i = 0; i < BOARD_SIZE; i+=3) {
-        if (board[i] == 1 && board[i+1] == 1 && board[i+2] == 1) {
-            return PLAYER_1_WON;
-        } else if (board[i] == 2 && board[i+1] == 2 && board[i+2] == 2) {
-            return PLAYER_2_WON;
+    /* Iterate through the rows, checking for a whole row of the same player. */
+    for (i = 0; i < BOARD_SIZE; i += ROW_SIZE) {
+        all_the_same = true; // assume true until proven wrong
+        first_cell = board[i]
+        
+        /* Iterate through the cells in a row, checking that they equal the first cell.
+           Note that it skips the first cell, as it will (by definition) equal itself. */
+        for (j = i + 1; j % ROW_SIZE != 0; j++) {
+            if (first_cell != board[j]) {
+                all_the_same = false;
+            }
+        }
+                
+        if (all_the_same) {
+            /* Someone has won - let's figure out who and return the appropriate result.
+               Or the whole row is empty, in which case nothing happens. */
+            if (board[i] = PLAYER_1) {
+                return PLAYER_1_WON;
+            } else if (board[i] == PLAYER_2) {
+                return PLAYER_2_WON;
+            }
         }
     }
-     
-    // Check for three in a row on the cols (036, 147, 258)
-    for (i = 0; i < 3; i++) {
-        if (board[i] == 1 && board[i+3] == 1 && board[i+6] == 1) {
-            return PLAYER_1_WON;
-        } else if (board[i] == 2 && board[i+3] == 2 && board[i+6] == 2) {
-            return PLAYER_2_WON;
+    
+    /* Iterate through the cols, checking for a whole col of the same player. */
+    for (i = 0; i < ROW_SIZE; i++) {
+        all_the_same = true; // assume true until proven wrong
+        first_cell = board[i]
+        
+        /* Iterate through the cells in a col, checking that they equal the first cell.
+           Note that it skips the first cell, as it will (by definition) equal itself. */
+        for (j = i + ROW_SIZE; j < BOARD_SIZE; j += ROW_SIZE) {
+            if (first_cell != board[j]) {
+                all_the_same = false;
+            }
+        }
+                
+        if (all_the_same) {
+            /* Someone has won - let's figure out who and return the appropriate result.
+               Or the whole col is empty, in which case nothing happens. */
+            return toWinner(board[i]);
         }
     }
+
+    /* Check for a whole diagonal from top-left to bottom-right.
+       Iterate through the cells in the diagonal, checking that they equal the first cell.
+       Note that it skips the first cell, as it will (by definition) equal itself. */
+    all_the_same = true; // assume true until proven wrong
+    first_cell = board[0];
     
-    // Check for three in a row on the diagonals (048, 246)
-    if (board[0] == 1 && board[4] == 1 && board[8] == 1) {
-        return PLAYER_1_WON;
-    } else if (board[0] == 2 && board[4] == 2 && board[8] == 2) {
-        return PLAYER_2_WON;
-    } 
-    if (board[2] == 1 && board[4] == 1 && board[6] == 1) {
-        return PLAYER_1_WON;
-    } else if (board[2] == 2 && board[4] == 2 && board[6] == 2) {
-        return PLAYER_2_WON;
+    for (i = ROW_SIZE + 1; i < BOARD_SIZE; i += ROW_SIZE + 1) {
+        if (first_cell != board[i]) {
+            all_the_same = false;
+        }
+    }
+            
+    if (all_the_same) {
+        /* Someone has won - let's figure out who and return the appropriate result.
+           Or the whole col is empty, in which case nothing happens. */
+        return toWinner(board[i]);
+    }
+
+    /* Check for a whole diagonal from top-right to bottom-left.
+       Iterate through the cells in the diagonal, checking that they equal the first cell.
+       Note that it skips the first cell, as it will (by definition) equal itself. */
+    all_the_same = true; // assume true until proven wrong
+    first_cell = board[ROW_SIZE - 1];
+    
+    for (i = 2 * (ROW_SIZE - 1); i < BOARD_SIZE; i += ROW_SIZE - 1) {
+        if (first_cell != board[i]) {
+            all_the_same = false;
+        }
+    }
+            
+    if (all_the_same) {
+        /* Someone has won - let's figure out who and return the appropriate result.
+           Or the whole col is empty, in which case nothing happens. */
+        return toWinner(board[i]);
     }
     
-    // Check for a tie - i.e. the board is full
-    bool arrayFull = true; //assume board is full until you find an empty space
+    /* Check for a tie - i.e. the board is full. */
+    bool arrayFull = true; // assume board is full until you find an empty space
     for (i = 0; i < BOARD_SIZE; i++) {
         if (board[i] == 0) {
-            //found empty space
+            /* Found an empty space. */
             arrayFull = false;
         }
     }
@@ -94,41 +170,37 @@ static Result get_result(void) {
         return TIE;
     }
     
-    // No result so far
+    /* Nothing so far has returned, so there is no result so far. */
     return NOT_FINISHED;
 }
 
-/** 
- * Updates board_bitmap based on the board, the position of the cursor,
- * and whether flashing elements are on or off.
- * @param p2_on true if player 2's LEDs should be turned on
- * @param cursor_position the position (as an index of board) of the cursor
- * @param cursor_on true if the cursor should be turned on
+
+/* Updates the variable `board_bitmap` based on the board, the position of the cursor,
+   and whether flashing elements are on or off.
+   @param p2_on true if player 2's LEDs should be turned on.
+   @param cursor_position the position (as an index of board) of the cursor.
+   @param cursor_on true if the cursor should be turned on.
  */
 static void set_board_bitmap(bool p2_on, uint8_t cursor_position, bool cursor_on)
 {
     int i;
+    /* The index of the row of LEDs to modify. */
     int row;
+
+    /* Iterate through each cell, modifying the board based on what is in it. */
     for (i = 0; i < BOARD_SIZE; i++) {
-        // Choose which row to modify
-        if (i < 3) {
-            row = 0; // First row
-        } else if (i < 6) {
-            row = 2; // Second row
-        } else {
-            row = 4; //Third row
-        }
+        /* Choose which row to modify. */
+        row = rows[i/COL_SIZE];
         
-        //Modify it
+        /* Check if cursor is here. */
         if (cursor_position == i) {
-            // the cursor is here
+            /* Check if the cursor is flash on. */
             if (cursor_on) {
-                // flash on
                 board_bitmap[row] |= 1 << (5 - 2*(i%3)) | 1 << (6 - 2*(i%3));
             } else {
-                //flash off
                 board_bitmap[row] &= ~(1 << (5 - 2*(i%3))) & ~(1 << (6 - 2*(i%3)));
             }
+        /* Check if player 1 is here */
         } else if (board[i] == 1) {
             // player 1 is here
             board_bitmap[row] |= 1 << (5 - 2*(i%3)) | 1 << (6 - 2*(i%3));
@@ -148,7 +220,7 @@ static void set_board_bitmap(bool p2_on, uint8_t cursor_position, bool cursor_on
     }
 }
 
-/** 
+/*
  * Sets the display (cell by cell) given a bitmap.
  * COPIED FROM demo.c - refactor into new module?
  */
@@ -165,7 +237,7 @@ static void set_display(const uint8_t bitmap[])
     return;
 }
 
-/** 
+/*
  * Turns on the LED if the cursor is in an occupied slot,
  * otherwise turns it off.
  * @param cursor_position the position (as an index of board) of the cursor
@@ -178,7 +250,7 @@ static void update_led(uint8_t cursor_position) {
     }
 }
 
-/**
+/*
  * @return the initial position of the cursor on the board
  */
 static uint8_t find_init_cursor_position(void) {
@@ -194,7 +266,7 @@ static uint8_t find_init_cursor_position(void) {
     return BOARD_SIZE;
 }
 
-/**
+/*
  * Current player having their turn.
  * @return the current result of the game
  */
@@ -304,7 +376,7 @@ static Result your_turn (void)
     }
 }
 
-/**
+/*
  * Waits for a signal that the other player has had their turn.
  * It will then place their symbol in that position on the board.
  * @return the current result of the game
@@ -397,21 +469,30 @@ static void display_result(Result result) {
 }
 
 
-/** Main game loop (and endgame). */ 
+/* Main game loop (and endgame). */ 
 void play(Player thisPlayer) {
 
-    player = thisPlayer; //assign player (globally)
-    
+    player = thisPlayer;
     Result result = NOT_FINISHED;
+
+    /* True if it is the current player's turn. */
     bool currentPlayersTurn;
     
-    // Clear the board
+    /* Clear the board. */
     int i;
     for (i = 0; i < BOARD_SIZE; i++) {
         board[i] = 0;
-    } 
+    }
+
+    /* Initialise the rows of LEDS to use. */
+    int i;
+    int row = 0;
+    for (i = 0; i < COL_SIZE; i++) {
+        rows[i] = row;
+        row += 2;
+    }
     
-    // If this is player 1, it is your turn. Otherwise it's not.
+    /* If this is player 1, it is your turn. Otherwise it's not. */
     currentPlayersTurn = (player == PLAYER_1);
     
     // Loop until finished
