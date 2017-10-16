@@ -1,3 +1,4 @@
+To load the program onto the board, run `make program` on each board from the team215 directory.
 
 To start the program, click the button.
 
