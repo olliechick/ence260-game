@@ -1,3 +1,7 @@
+/**
+ * Ollie Chick
+ * Leo Lloyd
+ * */
 #include <stdbool.h>
 
 #include "system.h"
