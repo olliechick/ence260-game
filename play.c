@@ -235,6 +235,37 @@ static Result your_turn (void)
                 set_display(board_bitmap);
                 ir_uart_putc(cursor_position); //send result to other player
                 return get_result();
+
+/*
+    led_set(LED1, true);
+
+
+    uint8_t ticker = 1;
+    
+    // Sending loop
+    while (1)
+    {
+        pacer_wait();
+        
+        //Try and get a response
+        if (ir_uart_read_ready_p())
+        {
+            if (ir_uart_getc() == 'a') {
+                //They have accepted the signal
+                led_set(LED1, true);
+                return get_result();
+            } 
+        }
+        
+        //Every 2^8 = 256 loops (to ensure ledmat doesn't flicker):
+        if (ticker == 0) {
+            ir_uart_putc(cursor_position); //send result to other player
+        }
+        ticker++;
+    }
+                */
+                
+                
             }
         }
             
@@ -272,9 +303,10 @@ static Result other_players_turn (void) {
         // Try and get a response
         if (ir_uart_read_ready_p()) {
             int i;
+            int received_position = ir_uart_getc();
             // Iterate through valid board array indices
             for (i = 0; i < BOARD_SIZE; i++) {
-                if (ir_uart_getc() == i) {
+                if (received_position == i) {
                     // Got a valid board array index
                     // This is where the other player went, so put
                     // them there on the board.
@@ -283,6 +315,11 @@ static Result other_players_turn (void) {
                     } else {
                         board[i] = PLAYER_1;
                     }
+
+/*
+                pacer_wait(); // wait one pace
+                ir_uart_putc('a'); //send acknowledgement
+*/
                     // TODO try uncommenting the below line if the board doesn't
                     // update (maybe when the other player wins?)
                     //set_board_bitmap(p2_on, cursor_position, cursor_on);
