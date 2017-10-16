@@ -1,9 +1,10 @@
-/**
- * @file demo.c
- * @author Ollie Chick
- * @date 10 October 2017
- * @brief Demo module
- */
+/** @file demo.c
+    @author Ollie Chick and Leo Lloyd
+    @brief Demo module - used to display information before the game starts.
+*/
+
+#ifndef DEMO_H
+#define DEMO_H
  
 #include <stdbool.h>
 
@@ -12,11 +13,14 @@
 #include "pacer.h"
 #include "tinygl.h"
 #include "button.h"
+#include "../fonts/font5x7_1.h"
 
-#define PACER_RATE 500 //Hz
-#define MILLISECS_IN_A_SEC 1000
-#define TIME_BETWEEN_FRAMES 2000 //milliseconds between each frame in demo
-
+/* Pacer rate in Hz. */
+#define PACER_RATE 500
+/* Time in seconds before arrow is displayed. */
+#define TIME_BEFORE_ARROW 14
 
 /** Plays the demo and returns when the button is pressed. */
 void play_demo (void);
+
+#endif

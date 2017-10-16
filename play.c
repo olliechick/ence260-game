@@ -1,3 +1,9 @@
+/**
+ * @file play.c
+ * @author Ollie Chick & Leo Lloyd
+ * @brief The main gameplay of Tic-tac-toe.
+ */
+
 #include <stdbool.h>
 #include <stdint.h>
 
@@ -6,29 +12,33 @@
 #include "navswitch.h"
 #include "led.h"
 #include "ir_uart.h"
+#include "../fonts/font5x7_1.h"
 
 #include "system.h"
 #include "pio.h"
 #include "button.h"
 
-#include "../fonts/font5x7_1.h"
-
 #define ROW_SIZE 3
 #define COL_SIZE 3
 #define BOARD_SIZE (ROW_SIZE * COL_SIZE)
 
-#define PACER_RATE 500 //Hz
-#define P2_FLASH_RATE 2 //Hz
-#define CURSOR_FLASH_RATE 5 //Hz
+/* Pacer rate in Hz. */
+#define PACER_RATE 500
+/* The rate that player 2's pieces flash, in Hz. */
+#define P2_FLASH_RATE 2
+/* The rate that the cursor flashes, in Hz. */
+#define CURSOR_FLASH_RATE 5
 
-/** The game board */
+/* The game board */
 static uint8_t board[9] = {0};
+/* The bitmap of the board. */
 static uint8_t board_bitmap[5] = {0};
-
-static bool p2_on = false;
-static bool cursor_on = false;
+/* Position of cursor on the board. */
 static uint8_t cursor_position = 0;
 static uint16_t ticker = 1; //Note this will overflow if PACER_RATE > 2^16-1 = 65535
+/* Bools to control flashing of player 2 and the cursor - on or off. */
+static bool p2_on = false;
+static bool cursor_on = false;
 
 typedef enum {NOT_FINISHED, PLAYER_1_WON, PLAYER_2_WON, TIE} Result;
 typedef enum {PLAYER_1 = 1, PLAYER_2 = 2} Player;
