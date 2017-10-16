@@ -17,7 +17,6 @@
 /* Time in seconds before arrow is displayed. */
 #define TIME_BEFORE_ARROW 15
 
-
 /* Bitmap of the arrow pointing to the button. */
 static const uint8_t arrow[] =
 {
@@ -47,6 +46,7 @@ static void set_display(const uint8_t bitmap[])
     }
     return;
 }
+
 
 /** Plays the demo and returns when the button is pressed. */
 void play_demo (void)

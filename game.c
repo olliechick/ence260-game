@@ -20,7 +20,6 @@
 /* How fast text scrolls in characters per 10 seconds. */
 #define MESSAGE_RATE 10
 
-
 /* Perform initialisation steps. */
 void initialise(void) {
     
