@@ -13,7 +13,6 @@
 #include "led.h"
 #include "ir_uart.h"
 #include "../fonts/font5x7_1.h"
-
 #include "system.h"
 #include "pio.h"
 #include "button.h"
@@ -174,6 +173,23 @@ static Result get_result(void) {
     return NOT_FINISHED;
 }
 
+/* Sets LED in board_bitmap in position given by (row, col) to state. */
+static void set_board_bitmap_led(uint8_t row; uint8_t col, bool state)
+{
+    if (state == 0) {
+        /* Turn off LED. */
+        board_bitmap[row] &= ~(1 << (DISPLAY_HEIGHT - 1 - col));
+    } else {
+        /* Turn on LED. */
+        board_bitmap[row] |= 1 << (ROW_SIZE - 1 - col);
+    }
+}
+
+/* Sets `board_bitmap` based on cell of tic-tac-toe board. */
+static void set_board_bitmap_cell (uint8_t cell, bool state)
+{
+    
+
 
 /* Updates the variable `board_bitmap` based on the board, the position of the cursor,
    and whether flashing elements are on or off.
@@ -196,6 +212,7 @@ static void set_board_bitmap(bool p2_on, uint8_t cursor_position, bool cursor_on
         if (cursor_position == i) {
             /* Check if the cursor is flash on. */
             if (cursor_on) {
+                set_board_bitmap_led(row, , true)
                 board_bitmap[row] |= 1 << (5 - 2*(i%3)) | 1 << (6 - 2*(i%3));
             } else {
                 board_bitmap[row] &= ~(1 << (5 - 2*(i%3))) & ~(1 << (6 - 2*(i%3)));
