@@ -8,7 +8,7 @@
 #include "system.h"
 #include "pio.h"
 #include "pacer.h"
-#include "display_bitmap.c"
+#include "display_bitmap.h"
 
 #include "tinygl.h"
 #include "button.h"

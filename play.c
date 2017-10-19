@@ -16,7 +16,7 @@
 #include "system.h"
 #include "pio.h"
 #include "button.h"
-#include "display_bitmap.c"
+#include "display_bitmap.h"
 
 #define ROW_SIZE 3
 #define COL_SIZE 3
@@ -35,15 +35,11 @@ static uint8_t board_bitmap[5] = {0};
 static uint8_t rows[ROW_SIZE];
 /* Position of cursor on the board. */
 static uint8_t cursor_position = 0;
-/* The current player. */
-static Player player;
 /* Ticker - used to control flashing. Note this will overflow if PACER_RATE > 2^16-1 = 65k */
 static uint16_t ticker = 1;
 /* Bools to control flashing of player 2 and the cursor - on or off. */
 static bool p2_on = false;
 static bool cursor_on = false;
-
-
 
 /* The result of a game. */
 typedef enum {NOT_FINISHED, PLAYER_1_WON, PLAYER_2_WON, TIE} Result;
@@ -51,14 +47,20 @@ typedef enum {NOT_FINISHED, PLAYER_1_WON, PLAYER_2_WON, TIE} Result;
 /* The players - how they are stored in the board. */
 typedef enum {PLAYER_1 = 1, PLAYER_2 = 2} Player;
 
+/* The current player. */
+static Player player;
+
 /* @param player the player who won
    @return the result where the player passed in wins
 */
 static Result toWinner(Player player) {
-    if (player = PLAYER_1) {
+    if (player == PLAYER_1) {
         return PLAYER_1_WON;
     } else if (player == PLAYER_2) {
         return PLAYER_2_WON;
+    } else {
+        /* Code flow should not reach here. */
+        return NOT_FINISHED;
     }
 }
 
@@ -79,7 +81,7 @@ static Result get_result(void) {
     /* Iterate through the rows, checking for a whole row of the same player. */
     for (i = 0; i < BOARD_SIZE; i += ROW_SIZE) {
         all_the_same = true; // assume true until proven wrong
-        first_cell = board[i]
+        first_cell = board[i];
         
         /* Iterate through the cells in a row, checking that they equal the first cell.
            Note that it skips the first cell, as it will (by definition) equal itself. */
@@ -92,18 +94,14 @@ static Result get_result(void) {
         if (all_the_same) {
             /* Someone has won - let's figure out who and return the appropriate result.
                Or the whole row is empty, in which case nothing happens. */
-            if (board[i] = PLAYER_1) {
-                return PLAYER_1_WON;
-            } else if (board[i] == PLAYER_2) {
-                return PLAYER_2_WON;
-            }
+            return toWinner(first_cell);
         }
     }
     
     /* Iterate through the cols, checking for a whole col of the same player. */
     for (i = 0; i < ROW_SIZE; i++) {
         all_the_same = true; // assume true until proven wrong
-        first_cell = board[i]
+        first_cell = board[i];
         
         /* Iterate through the cells in a col, checking that they equal the first cell.
            Note that it skips the first cell, as it will (by definition) equal itself. */
@@ -116,7 +114,7 @@ static Result get_result(void) {
         if (all_the_same) {
             /* Someone has won - let's figure out who and return the appropriate result.
                Or the whole col is empty, in which case nothing happens. */
-            return toWinner(board[i]);
+            return toWinner(first_cell);
         }
     }
 
@@ -135,7 +133,7 @@ static Result get_result(void) {
     if (all_the_same) {
         /* Someone has won - let's figure out who and return the appropriate result.
            Or the whole col is empty, in which case nothing happens. */
-        return toWinner(board[i]);
+        return toWinner(first_cell);
     }
 
     /* Check for a whole diagonal from top-right to bottom-left.
@@ -153,7 +151,7 @@ static Result get_result(void) {
     if (all_the_same) {
         /* Someone has won - let's figure out who and return the appropriate result.
            Or the whole col is empty, in which case nothing happens. */
-        return toWinner(board[i]);
+        return toWinner(first_cell);
     }
     
     /* Check for a tie - i.e. the board is full. */
@@ -173,7 +171,7 @@ static Result get_result(void) {
 }
 
 /* Sets LED in board_bitmap in position given by (row, col) to state. */
-static void set_board_bitmap_led(uint8_t row; uint8_t col, bool state)
+static void set_board_bitmap_led(uint8_t row, uint8_t col, bool state)
 {
     if (state == 0) {
         /* Turn off LED. */
@@ -186,7 +184,16 @@ static void set_board_bitmap_led(uint8_t row; uint8_t col, bool state)
 
 /* Sets `board_bitmap` based on cell of tic-tac-toe board. */
 static void set_board_bitmap_cell (uint8_t cell, bool state)
-{
+{    
+    /* Choose which row and columns to modify. */
+    int row = rows[cell/COL_SIZE];
+    int col1 = 2*(cell%3) - 6; //TODO explain this hinky maths
+    int col2 = 2*(cell%3) - 7;
+    
+    /* Modify them. */
+    set_board_bitmap_led(row, col1, state);
+    set_board_bitmap_led(row, col2, state);
+}
     
 
 
@@ -199,39 +206,21 @@ static void set_board_bitmap_cell (uint8_t cell, bool state)
 static void set_board_bitmap(bool p2_on, uint8_t cursor_position, bool cursor_on)
 {
     int i;
-    /* The index of the row of LEDs to modify. */
-    int row;
 
     /* Iterate through each cell, modifying the board based on what is in it. */
     for (i = 0; i < BOARD_SIZE; i++) {
-        /* Choose which row to modify. */
-        row = rows[i/COL_SIZE];
-        
-        /* Check if cursor is here. */
         if (cursor_position == i) {
-            /* Check if the cursor is flash on. */
-            if (cursor_on) {
-                set_board_bitmap_led(row, , true)
-                board_bitmap[row] |= 1 << (5 - 2*(i%3)) | 1 << (6 - 2*(i%3));
-            } else {
-                board_bitmap[row] &= ~(1 << (5 - 2*(i%3))) & ~(1 << (6 - 2*(i%3)));
-            }
-        /* Check if player 1 is here */
-        } else if (board[i] == 1) {
-            // player 1 is here
-            board_bitmap[row] |= 1 << (5 - 2*(i%3)) | 1 << (6 - 2*(i%3));
-        } else if (board[i] == 2) {
-            // player 2 is here
-            if (p2_on) {
-                board_bitmap[row] |= (1 << (5 - 2*(i%3)));
-                board_bitmap[row] |= 1 << (6 - 2*(i%3));
-            } else {
-                board_bitmap[row] &= ~(1 << (6 - 2*(i%3)));
-                board_bitmap[row] &= ~(1 << (5 - 2*(i%3)));
-            }
+            /* The cursor is here. */
+            set_board_bitmap_cell(i, cursor_on);
+        } else if (board[i] == PLAYER_1) {
+            /* Player 1 is here. */
+            set_board_bitmap_cell(i, true);
+        } else if (board[i] == PLAYER_2) {
+            /* Player 2 is here. */
+            set_board_bitmap_cell(i, p2_on);
         } else {
-            //nothing is here
-            board_bitmap[row] &= ~(1 << (5 - 2*(i%3))) & ~(1 << (6 - 2*(i%3)));
+            /* Nothing is here. */
+            set_board_bitmap_cell(i, false);
         }
     }
 }
@@ -484,7 +473,6 @@ void play(Player thisPlayer) {
     }
 
     /* Initialise the rows of LEDS to use. */
-    int i;
     int row = 0;
     for (i = 0; i < COL_SIZE; i++) {
         rows[i] = row;
