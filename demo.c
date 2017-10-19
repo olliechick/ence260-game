@@ -8,12 +8,12 @@
 #include "system.h"
 #include "pio.h"
 #include "pacer.h"
+#include "display_bitmap.c"
+
 #include "tinygl.h"
 #include "button.h"
 #include "../fonts/font5x7_1.h"
 
-/* Pacer rate in Hz. */
-#define PACER_RATE 500
 /* Time in seconds before arrow is displayed. */
 #define TIME_BEFORE_ARROW 15
 
@@ -29,24 +29,6 @@ static const uint8_t arrow[] =
     // |....@..|
     // |....@..|
 };
-
-/** 
- * Sets the display (cell by cell) given a bitmap.
- * 
- */
-static void set_display(const uint8_t bitmap[])
-{
-    int i;
-    int j;
-    for (i = 0; i < DISPLAY_WIDTH; i++) {
-        for (j = 0; j < DISPLAY_HEIGHT; j++) {
-            bool val = bitmap[i] & (1 << j);
-            tinygl_draw_point(tinygl_point(i, j), val);
-        }
-    }
-    return;
-}
-
 
 /** Plays the demo and returns when the button is pressed. */
 void play_demo (void)
