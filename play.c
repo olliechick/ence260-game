@@ -16,15 +16,12 @@
 #include "system.h"
 #include "pio.h"
 #include "button.h"
+#include "display_bitmap.c"
 
 #define ROW_SIZE 3
 #define COL_SIZE 3
 #define BOARD_SIZE (ROW_SIZE * COL_SIZE)
 
-/* The indices of the rows of LEDs that */
-
-/* Pacer rate in Hz. */
-#define PACER_RATE 500
 /* The rate that player 2's pieces flash, in Hz. */
 #define P2_FLASH_RATE 2
 /* The rate that the cursor flashes, in Hz. */
@@ -45,6 +42,8 @@ static uint16_t ticker = 1;
 /* Bools to control flashing of player 2 and the cursor - on or off. */
 static bool p2_on = false;
 static bool cursor_on = false;
+
+
 
 /* The result of a game. */
 typedef enum {NOT_FINISHED, PLAYER_1_WON, PLAYER_2_WON, TIE} Result;
@@ -235,23 +234,6 @@ static void set_board_bitmap(bool p2_on, uint8_t cursor_position, bool cursor_on
             board_bitmap[row] &= ~(1 << (5 - 2*(i%3))) & ~(1 << (6 - 2*(i%3)));
         }
     }
-}
-
-/*
- * Sets the display (cell by cell) given a bitmap.
- * COPIED FROM demo.c - refactor into new module?
- */
-static void set_display(const uint8_t bitmap[])
-{
-    int i;
-    int j;
-    for (i = 0; i < DISPLAY_WIDTH; i++) {
-        for (j = 0; j < DISPLAY_HEIGHT; j++) {
-            bool val = bitmap[i] & (1 << j);
-            tinygl_draw_point(tinygl_point(i, j), val);
-        }
-    }
-    return;
 }
 
 /*
