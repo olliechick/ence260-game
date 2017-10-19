@@ -17,18 +17,23 @@ all: game.out
 
 # Compile: create object files from C source files.
 
+# Game-specific files
 game.o: game.c demo.h connect.h play.h ../../drivers/avr/system.h ../../drivers/led.h  ../../utils/tinygl.h ../../drivers/avr/ir_uart.h
 	$(CC) -c $(CFLAGS) $< -o $@
 
-demo.o: demo.c ../../drivers/avr/pio.h ../../drivers/avr/system.h ../../utils/pacer.h ../../drivers/button.h ../../utils/tinygl.h
+demo.o: demo.c display_bitmap.h ../../drivers/avr/pio.h ../../drivers/avr/system.h ../../utils/pacer.h ../../drivers/button.h ../../utils/tinygl.h
 	$(CC) -c $(CFLAGS) $< -o $@
 	
-play.o: play.c  ../../utils/pacer.h ../../utils/tinygl.h ../../drivers/navswitch.h ../../drivers/led.h ../../drivers/avr/ir_uart.h
+play.o: play.c display_bitmap.h ../../utils/pacer.h ../../utils/tinygl.h ../../drivers/navswitch.h ../../drivers/led.h ../../drivers/avr/ir_uart.h
 	$(CC) -c $(CFLAGS) $< -o $@
 	
-connect.o: connect.c ../../drivers/avr/ir_uart.h ../../utils/pacer.h   ../../fonts/font5x7_1.h ../../utils/font.h ../../utils/tinygl.h
+connect.o: connect.c ../../drivers/avr/ir_uart.h ../../utils/pacer.h ../../fonts/font5x7_1.h ../../utils/font.h ../../utils/tinygl.h
+	$(CC) -c $(CFLAGS) $< -o $@
+	
+display_bitmap.o: display_bitmap.c ../../drivers/avr/pio.h ../../drivers/avr/system.h ../../utils/tinygl.h ../../fonts/font5x7_1.h 
 	$(CC) -c $(CFLAGS) $< -o $@
 
+# Driver and utility files
 pio.o: ../../drivers/avr/pio.c ../../drivers/avr/pio.h ../../drivers/avr/system.h
 	$(CC) -c $(CFLAGS) $< -o $@
 
@@ -76,7 +81,7 @@ navswitch.o: ../../drivers/navswitch.c ../../drivers/avr/delay.h ../../drivers/a
 
 
 # Link: create ELF output file from object files.
-game.out: game.o demo.o connect.o system.o timer.o pio.o pacer.o ir_uart.o timer0.o usart1.o timer.o prescale.o play.o led.o font.o tinygl.o display.o ledmat.o button.o navswitch.o
+game.out: game.o demo.o connect.o display_bitmap.o system.o timer.o pio.o pacer.o ir_uart.o timer0.o usart1.o timer.o prescale.o play.o led.o font.o tinygl.o display.o ledmat.o button.o navswitch.o 
 	$(CC) $(CFLAGS) $^ -o $@ -lm
 	$(SIZE) $@
 
