@@ -1,5 +1,5 @@
 /** @file display_bitmap.c
-    @author Ollie Chick & Leo Lloyd
+    @author Ollie Chick (och26) and Leo Lloyd (lll28)
     @brief A module for setting the display to a bitmap.
 */
 
@@ -7,9 +7,6 @@
 #define DISPLAY_BITMAP_H
 
 #include "system.h"
-#include "pio.h"
-#include "tinygl.h"
-#include "../fonts/font5x7_1.h"
 
 /* Pacer rate in Hz. */
 #define PACER_RATE 500

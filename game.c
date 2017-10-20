@@ -1,8 +1,7 @@
-/**
- * @file game.c
- * @author Ollie Chick & Leo Lloyd
- * @brief Tic-tac-toe game.
- */
+/** @file game.c
+    @author Ollie Chick (och26) and Leo Lloyd (lll28)
+    @brief Tic-tac-toe game.
+*/
 #include <stdbool.h>
 
 #include "system.h"
@@ -15,8 +14,8 @@
 #include "connect.h"
 #include "play.h"
 
-/* Pacer rate in Hz. */
-#define PACER_RATE 500
+/* Pacer rate in Hz. 
+#define PACER_RATE 500*/
 /* How fast text scrolls in characters per 10 seconds. */
 #define MESSAGE_RATE 10
 

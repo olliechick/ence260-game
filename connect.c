@@ -1,5 +1,5 @@
 /** @file connect.c
-    @author Ollie Chick
+    @author Ollie Chick (och26)
     @brief Connects to another funkit. Differentiates between sender and receiver.
 */
 

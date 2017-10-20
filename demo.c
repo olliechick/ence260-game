@@ -1,5 +1,5 @@
 /** @file demo.c
-    @author Ollie Chick and Leo Lloyd
+    @author Ollie Chick (och26) and Leo Lloyd (lll28)
     @brief Demo module - used to display information before the game starts.
 */
  
@@ -8,13 +8,13 @@
 #include "system.h"
 #include "pio.h"
 #include "pacer.h"
-#include "display_bitmap.h"
-
 #include "tinygl.h"
 #include "button.h"
 #include "../fonts/font5x7_1.h"
 
-/* Time in seconds before arrow is displayed. */
+#include "display_bitmap.h"
+
+/* Time in seconds before the arrow is displayed. */
 #define TIME_BEFORE_ARROW 15
 
 /* Bitmap of the arrow pointing to the button. */

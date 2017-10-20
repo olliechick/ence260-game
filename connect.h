@@ -1,18 +1,12 @@
 /** @file connect.c
-    @author Ollie Chick
+    @author Ollie Chick (och26)
     @brief Connects to another funkit. Differentiates between sender and receiver.
 */
 
 #ifndef CONNECT_H
 #define CONNECT_H
 
-#include <stdbool.h>
-
-#include "ir_uart.h"
 #include "system.h"
-#include "pacer.h"
-#include "tinygl.h"
-#include "../fonts/font5x7_1.h"
 
 #define MILLISECS_IN_A_SEC 1000
 /* Pacer rate in Hz. */
