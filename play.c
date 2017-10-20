@@ -294,7 +294,7 @@ static Result your_turn (void)
         } else if (navswitch_push_event_p(NAVSWITCH_SOUTH) && (cursor_position%COL_SIZE != 0)) {
             /* Move cursor left a column (if it won't go off the board). */
             cursor_position--;
-        } else if (navswitch_push_event_p(NAVSWITCH_PUSH) && (board[cursor_position] == 0) {
+        } else if (navswitch_push_event_p(NAVSWITCH_PUSH) && (board[cursor_position] == 0)) {
             /* Place player's mark in the cursor's location (if it is in a valid position). */
             board[cursor_position] = player;
             set_board_bitmap(p2_on, cursor_position, cursor_on);
