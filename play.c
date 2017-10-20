@@ -179,7 +179,7 @@ static Result get_result(void) {
 static void set_board_bitmap_led(uint8_t row, uint8_t col, bool state)
 {
     if (state) {
-        board_bitmap[row] |= 1 << (ROW_SIZE - 1 - col);
+        board_bitmap[row] |= 1 << (DISPLAY_HEIGHT - 1 - col);
     } else {
         board_bitmap[row] &= ~(1 << (DISPLAY_HEIGHT - 1 - col));
     }
@@ -190,9 +190,9 @@ static void set_board_bitmap_led(uint8_t row, uint8_t col, bool state)
 static void set_board_bitmap_cell (uint8_t cell, bool state)
 {    
     /* Choose which row and columns to modify. */
-    int row = rows[cell/COL_SIZE];
-    int col1 = 2*(cell%3) - 6;
-    int col2 = 2*(cell%3) - 7;
+    int row = rows[cell/ROW_SIZE];
+    int col1 = 2*(cell%3);
+    int col2 = 2*(cell%3) + 1;
     
     /* Modify them. */
     set_board_bitmap_led(row, col1, state);
@@ -212,6 +212,9 @@ static void set_board_bitmap(bool p2_on, uint8_t cursor_position, bool cursor_on
 
     /* Iterate through each cell, modifying the board based on what is in it. */
     for (i = 0; i < BOARD_SIZE; i++) {
+        /*if (i == 0) {
+            board_bitmap[0] |= (1 << ROW_SIZE | 1 << 5);
+        } else */
         if (cursor_position == i) {
             /* The cursor is here. */
             set_board_bitmap_cell(i, cursor_on);
@@ -236,6 +239,7 @@ static void set_board_bitmap(bool p2_on, uint8_t cursor_position, bool cursor_on
  */
 static void update_led(uint8_t cursor_position) {
     if (board[cursor_position]) {
+        /* There is something here. */
         led_set (LED1, true);
     } else {
         led_set (LED1, false);
@@ -266,7 +270,7 @@ static uint8_t find_init_cursor_position(void) {
  * @return the current result of the game
  */
 static Result your_turn (void)
-{   
+{
     pacer_init(PACER_RATE);
     
     /* Initialise turn. */
@@ -335,7 +339,6 @@ static Result your_turn (void)
  */
 static Result other_players_turn (void) {
     //return get_result(); //DEBUG - just ignore other player's turn
-   
     /* Move the cursor off the board and turn it off. */
     cursor_on = false;
     cursor_position = BOARD_SIZE;
@@ -368,7 +371,7 @@ static Result other_players_turn (void) {
         if (ticker % (PACER_RATE/P2_FLASH_RATE) == 0) {
             // Toggle player 2's LEDs
             p2_on = !p2_on;
-            set_board_bitmap(p2_on, cursor_position, cursor_on);
+            set_board_bitmap(p2_on, cursor_position, p2_on);
             set_display(board_bitmap);
         }
         
@@ -387,7 +390,7 @@ static void display_result(Result result) {
     
     tinygl_clear();
     
-    /* Check for win/loss/tie. */
+    /* Check what the result was. */
     if ((result == PLAYER_1_WON && player == PLAYER_1) ||
         (result == PLAYER_2_WON && player == PLAYER_2)) {
         // Won
