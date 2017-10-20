@@ -14,8 +14,8 @@
 #include "connect.h"
 #include "play.h"
 
-/* Pacer rate in Hz. 
-#define PACER_RATE 500*/
+/* Pacer rate in Hz. */
+#define PACER_RATE 500
 /* How fast text scrolls in characters per 10 seconds. */
 #define MESSAGE_RATE 10
 
